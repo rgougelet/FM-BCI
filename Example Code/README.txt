@@ -1,1 +1,0 @@
-These files contain functionality that isn't commented extremely well that you can use to scrape for the appropriate commands to do what we want
