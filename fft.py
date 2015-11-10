@@ -1,38 +1,3 @@
-# import matplotlib.pyplot as plt
-# import plotly.plotly as py
-# import numpy as np
-# # Learn about API authentication here: https://plot.ly/python/getting-started
-# # Find your api_key here: https://plot.ly/settings/api
-
-# Fs = 150.0;  # sampling rate
-# Ts = 1.0/Fs; # sampling interval
-# t = np.arange(0,1,Ts) # time vector
-
-# ff = 5;   # frequency of the signal
-# y = np.sin(2*np.pi*ff*t)
-
-# n = len(y) # length of the signal
-# k = np.arange(n)
-# T = n/Fs
-# frq = k/T # two sides frequency range
-# frq = frq[range(n/2)] # one side frequency range
-
-# Y = np.fft.fft(y)/n # fft computing and normalization
-# Y = Y[range(n/2)]
-
-# fig, ax = plt.subplots(2, 1)
-# ax[0].plot(t,y)
-# ax[0].set_xlabel('Time')
-# ax[0].set_ylabel('Amplitude')
-# ax[1].plot(frq,abs(Y),'r') # plotting the spectrum
-# ax[1].set_xlabel('Freq (Hz)')
-# ax[1].set_ylabel('|Y(freq)|')
-
-# plot_url = py.plot_mpl(fig, filename='mpl-basic-fft')
-
-# fft on signal length 1 second, which is every last seconds for the plot
-# applying running mediam
-
 
 # %matplotlib inline
 import pylab
@@ -42,11 +7,6 @@ import scipy.fftpack
 import random
 
 
-# plt.plot(np.arange(0, 1024)/1024., data[10000:11024])
-# plt.ylabel('Voltage (uV)')
-# plt.xlabel('Time [s]')
-# plt.title('ECoG Signal in Time Domain')
-
 # Number of samplepoints
 samples = 256
 # sample spacing
@@ -54,18 +14,18 @@ sampleSpacing = 1.0 / samples
 t = np.linspace(0.0, samples * sampleSpacing, samples)
 
 # voltage simulation 1
-sig1 = np.sin(8.0 * 2.0 * np.pi * t)
-sig2 = np.sin(12.0 * 2.0 * np.pi * t)
+sig1 = np.sin(8.0 * 2.0 * np.pi * t)   # f = 8, amplitude = 1
+sig2 = 2 * np.sin(12.0 * 2.0 * np.pi * t)   # f = 12, amplitue = 2
 voltage = sig1 + sig2
 
 # voltage simulation 2
 fc = 10.  # Hz the carrier frequency
 fm = .01  # Hz the modulating frequency
 pd = .5  # Hz amplitude of the frequency deviation
-# voltage = np.sin(2 * np.pi * fc * t + pd * np.sin(2 * np.pi * fm * t) / fm)
+voltage = np.sin(2 * np.pi * fc * t + pd * np.sin(2 * np.pi * fm * t) / fm)
 
+# 8 zero paddings for higher fft frequency resolution
 fy=scipy.fftpack.fft(voltage, samples * 8)
-# fy=scipy.fftpack.fft(voltage)
 print ('length of fy ', len(fy))
 # finding frequency values for the x axis
 fx_step_size=samples * 1.0 / len(fy)
@@ -74,8 +34,11 @@ total_steps=nyq / fx_step_size
 fx_bins=np.linspace(0, nyq, total_steps)
 # xf = np.linspace(0.0, samples / 2, samples / 2)
 
+# find peak frequency
+maxAmplitude = np.argmax(abs(fy[0:128]))
+print('max Amplitude: ', abs(fy[maxAmplitude]))
+print('max frequency: ', fx_bins[maxAmplitude])
 
-# print(np.amax(fy))
 
 
 # plot the figures
@@ -90,8 +53,9 @@ ax1.grid()
 ax2=fig.add_subplot(212)
 ax2.set_xlabel('Frequency [Hz]')
 ax2.set_ylabel('Amplitude')
-# show frequency ranges from 0 to 100
+# show to top 128 frequencies
 ax2.plot(fx_bins[0:128], abs(fy[0:128]))
+ax2.plot(fx_bins[maxAmplitude], abs(fy[maxAmplitude]), 'rD')   # highest frequency marker
 ax2.grid()
 
 plt.show()
