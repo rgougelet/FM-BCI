@@ -4,6 +4,7 @@ LSL."""
 import random
 import time
 import math
+import numpy as np
 
 from pylsl import StreamInfo, StreamOutlet
 
@@ -25,13 +26,17 @@ while True:
     #             random.random(), random.random(), random.random(),
     #             random.random(), random.random()]
 
-    channel1 = math.sin(time.time())  # a function of voltage
-    channel2 = math.cos(time.time())
-    channel3 = 1/time.time()
+    channel1 = np.sin(1.0 * 2.0 * np.pi * time.time())  
+    channel2 = np.cos(1.0 * 2.0 * np.pi * time.time())   
+    channel3 = np.sin(10.0 * 2.0 * np.pi * time.time())   
+    channel4 = np.cos(10.0 * 2.0 * np.pi * time.time())   
+    channel5 = np.sin(15.0 * 2.0 * np.pi * time.time())   
+    channel6 = np.cos(15.0 * 2.0 * np.pi * time.time())  
+    channel7 = 1/time.time()
     # each channel have a voltage value over time.
     mysample = [channel1, channel2, channel3,
-                random.random(), random.random(), random.random(),
-                random.random(), random.random()]
+                channel4, channel5, channel6,
+                channel7, random.random()]
 
     # now send it and wait for a bit
     outlet.push_sample(mysample)

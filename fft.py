@@ -24,6 +24,7 @@ fc = 10.  # Hz the carrier frequency
 fm = .01  # Hz the modulating frequency
 pd = .5  # Hz amplitude of the frequency deviation
 voltage = np.sin(2 * np.pi * fc * t + pd * np.sin(2 * np.pi * fm * t) / fm)
+print voltage.shape
 
 # 8 zero paddings for higher fft frequency resolution
 fy=scipy.fftpack.fft(voltage, samples * 8)
