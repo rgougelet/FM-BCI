@@ -35,9 +35,15 @@ while True:
     voltageSamples[:, sampleIndex] = sample
     sampleIndex += 1
 
+<<<<<<< HEAD
     if sampleIndex == dataLengthSamples:
         processingPAF(voltageSamples,sampleRate)
         sampleIndex = 0
+=======
+    if sampleIndex == 256:
+        processingPAF(voltageSamples, timestamp)
+        # sampleIndex = 0
+>>>>>>> 8269aee04574e7b156d55170f2f4e5e563106e05
 
 
 

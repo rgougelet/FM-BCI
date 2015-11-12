@@ -18,6 +18,7 @@ outlet = StreamOutlet(info)
 
 print("now sending data...")
 while True:
+<<<<<<< HEAD
     
     # channel1 = np.sin(1.0 * 2.0 * np.pi * time.time())  
     # channel2 = np.sin(5.0 * 2.0 * np.pi * time.time())   
@@ -37,6 +38,22 @@ while True:
     channel7 = 0.7*np.sin(40.0 * 2.0 * np.pi * time.time()) + random.random()
     channel8 = 0.8*np.sin(45.0 * 2.0 * np.pi * time.time()) + random.random()
     
+=======
+    # make a new random 8-channel sample; this is converted into a
+    # pylsl.vectorf (the data type that is expected by push_sample)
+    # mysample = [random.random(), random.random(), random.random(),
+    #             random.random(), random.random(), random.random(),
+    #             random.random(), random.random()]
+
+    channel1 = np.sin(1.0 * 2.0 * np.pi * time.time())  
+    channel2 = np.cos(1.0 * 2.0 * np.pi * time.time())   
+    channel3 = np.sin(10.0 * 2.0 * np.pi * time.time())   
+    channel4 = np.cos(10.0 * 2.0 * np.pi * time.time())   
+    channel5 = np.sin(15.0 * 2.0 * np.pi * time.time())   
+    channel6 = np.cos(15.0 * 2.0 * np.pi * time.time())  
+
+    channel7 = 1/time.time()
+>>>>>>> 8269aee04574e7b156d55170f2f4e5e563106e05
     # each channel have a voltage value over time.
     mysample = [channel1, channel2, channel3,
                 channel4, channel5, channel6,
