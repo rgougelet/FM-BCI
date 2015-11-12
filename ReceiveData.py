@@ -35,7 +35,7 @@ while True:
     sampleIndex += 1
 
     if sampleIndex == 256:
-        processingPAF(voltageSamples)
+        processingPAF(voltageSamples, timestamp)
         sampleIndex = 0
 
     # print voltageSamples

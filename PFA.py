@@ -9,13 +9,16 @@ import math
 
 
 # voltage = matrix[numOfChannel,numOfSamplesPerSecond]
-def processingPAF(voltageSamples):
+def processingPAF(voltageSamples, timeStamp):
     # Number of samplepoints
     numOfChannel = voltageSamples.shape[0]     # number of channels
     samples = voltageSamples.shape[1]          # sample size
 
     sampleSpacing = 1.0 / samples       # sample spacing
     t = np.linspace(0.0, samples * sampleSpacing, samples)
+
+    # print out time stamp
+    print("Time: ", timeStamp)
 
     # going through each channel to plot fft result 
     for channelIndex in range(0,numOfChannel):
@@ -43,7 +46,7 @@ def processingPAF(voltageSamples):
 
 
         # do not run this cuz you are gonna get bombarded with plots
-        
+
         # # plot the figures
         # fig=plt.figure(figsize=(12, 9))
         # ax1=fig.add_subplot(211)
