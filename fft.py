@@ -5,7 +5,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.fftpack
 import random
-
+import time
+import math
 
 # Number of samplepoints
 samples = 256
@@ -16,7 +17,7 @@ t = np.linspace(0.0, samples * sampleSpacing, samples)
 # voltage simulation 1
 sig1 = np.sin(8.0 * 2.0 * np.pi * t)   # f = 8, amplitude = 1
 sig2 = 2 * np.sin(12.0 * 2.0 * np.pi * t)   # f = 12, amplitue = 2
-voltage = sig1 + sig2
+# voltage = sig1 + sig2
 
 # voltage simulation 2
 fc = 10.  # Hz the carrier frequency
