@@ -45,6 +45,7 @@ print('max frequency: ', fx_bins[maxAmplitude])
 
 # plot the figures
 fig=plt.figure(figsize=(12, 9))
+fig.suptitle(('bold figure suptitle' + repr(1)), fontsize=14, fontweight='bold')
 ax1=fig.add_subplot(211)
 # ax1.set_title('axes title')
 ax1.set_xlabel('Time [s]')

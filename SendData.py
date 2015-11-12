@@ -32,6 +32,7 @@ while True:
     channel4 = np.cos(10.0 * 2.0 * np.pi * time.time())   
     channel5 = np.sin(15.0 * 2.0 * np.pi * time.time())   
     channel6 = np.cos(15.0 * 2.0 * np.pi * time.time())  
+
     channel7 = 1/time.time()
     # each channel have a voltage value over time.
     mysample = [channel1, channel2, channel3,

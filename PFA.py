@@ -47,23 +47,24 @@ def processingPAF(voltageSamples, timeStamp):
 
         # do not run this cuz you are gonna get bombarded with plots
 
-        # # plot the figures
-        # fig=plt.figure(figsize=(12, 9))
-        # ax1=fig.add_subplot(211)
-        # # ax1.set_title('axes title')
-        # ax1.set_xlabel('Time [s]')
-        # ax1.set_ylabel('Voltage [V]')
-        # ax1.plot(t, voltage)
-        # ax1.grid()
+        # plot the figures
+        fig=plt.figure(figsize=(12, 9))
+        fig.suptitle(('channel ' + repr(channelIndex + 1)), fontsize=14, fontweight='bold')
+        ax1=fig.add_subplot(211)
+        # ax1.set_title('axes title')
+        ax1.set_xlabel('Time [s]')
+        ax1.set_ylabel('Voltage [V]')
+        ax1.plot(t, voltage)
+        ax1.grid()
 
-        # ax2=fig.add_subplot(212)
-        # ax2.set_xlabel('Frequency [Hz]')
-        # ax2.set_ylabel('Amplitude')
-        # # show to top 128 frequencies
-        # ax2.plot(fx_bins[0:128], abs(fy[0:128]))
-        # ax2.plot(fx_bins[maxAmplitude], abs(fy[maxAmplitude]), 'rD')   # highest frequency marker
-        # ax2.grid()
+        ax2=fig.add_subplot(212)
+        ax2.set_xlabel('Frequency [Hz]')
+        ax2.set_ylabel('Amplitude')
+        # show to top 128 frequencies
+        ax2.plot(fx_bins[0:128], abs(fy[0:128]))
+        ax2.plot(fx_bins[maxAmplitude], abs(fy[maxAmplitude]), 'rD')   # highest frequency marker
+        ax2.grid()
 
-        # plt.show()
+        plt.show()
 
 
