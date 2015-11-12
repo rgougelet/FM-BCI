@@ -42,6 +42,8 @@ def processingPAF(voltageSamples):
 
 
 
+        # do not run this cuz you are gonna get bombarded with plots
+        
         # # plot the figures
         # fig=plt.figure(figsize=(12, 9))
         # ax1=fig.add_subplot(211)
