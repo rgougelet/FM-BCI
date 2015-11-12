@@ -18,12 +18,13 @@ streams = resolve_stream('type', 'EEG')
 # create a new inlet to read from the stream
 inlet = StreamInlet(streams[0])
 
-# the populating the array in real time
-numOfSamplesPerSecond = 256
+# populate the array in real time
+sampleRate = 512 # make sure this matches the sampleRate in SendData.py
 numOfChannel = 8
-voltageSamples = np.empty([numOfChannel,numOfSamplesPerSecond])
+dataLengthSecs = 10
+dataLengthSamples = dataLengthSecs*sampleRate
+voltageSamples = np.empty([numOfChannel,dataLengthSamples])
 sampleIndex = 0
-
 
 while True:
     # get a new sample (you can also omit the timestamp part if you're not
@@ -34,13 +35,9 @@ while True:
     voltageSamples[:, sampleIndex] = sample
     sampleIndex += 1
 
-    if sampleIndex == 256:
-        processingPAF(voltageSamples)
+    if sampleIndex == dataLengthSamples:
+        processingPAF(voltageSamples,sampleRate)
         sampleIndex = 0
-
-    # print voltageSamples
-    # print len(voltageSamples)
-    # print(timestamp, samples.shape)
 
 
 
