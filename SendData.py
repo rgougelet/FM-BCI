@@ -1,76 +1,65 @@
-<<<<<<< HEAD
 """Example program to demonstrate how to send a multi-channel time series to
 LSL."""
-
-import random 
-import time
-=======
 import random
 import time
 import math
->>>>>>> aacc66aa8ff55e57a29c499d25a3bbd585a74e6b
 import numpy as np
+from pylsl import StreamInfo, StreamOutlet, vectorf
 
-from pylsl import StreamInfo, StreamOutlet
+for clearline in range(1,100):
+	print('\n')
 
-
-# first create a new stream info (here we set the name to BioSemi,
-# the content-type to EEG, 8 channels, 100 Hz(Sampling Rate/per second), and float-valued data) The
-# last value would be the serial number of the device or some other more or
-# less locally unique identifier for the stream as far as available (you
-# could also omit it but interrupted connections wouldn't auto-recover).
-<<<<<<< HEAD
-info = StreamInfo('BioSemi', 'EEG', 8, 256, 'float32', 'myuid34234')
-
-fc = 10.  # Hz the carrier frequency
-fm = .01  # Hz the modulating frequency
-pd = .5   # Hz amplitude of the frequency deviation
-
-signal = np.sin(2 * np.pi * fc * time.time() + pd *
-                np.sin(2 * np.pi * fm * time.time()) / fm)
-=======
 sampleRate = 512.0
-info = StreamInfo('BioSemi', 'EEG', 8, sampleRate, 'float32', 'myuid34234')
->>>>>>> aacc66aa8ff55e57a29c499d25a3bbd585a74e6b
+info = StreamInfo('SimulatedEEG', 'EEG', 8, sampleRate, 'float32', 'myuid34234')
+
+#
+
+numOfChannel = 8
+channelWeights = np.linspace(1./numOfChannel,1,numOfChannel) 
+np.random.shuffle(channelWeights)
+print 'Channel weights:', '\n'
+for channelIndex in range(numOfChannel):
+	print "        ", channelIndex+1, "   ", channelWeights[channelIndex]
+alphaCenter = 10.   # Hz the carrier frequency
+alphaModFreq = 0.1  # Hz the modulating frequency
+alphaFreqDev = 1	# Hz of the frequency deviation
+snr = 2             # signal / noise
+noiseMean = 0
+noiseStdDev = 0.5
+alphaMean = 0
+alphaStdDev = abs(np.sqrt(snr*(noiseStdDev**2))) # std of sine wave
+alphaAmp = np.sqrt(2)*alphaStdDev
+h = alphaFreqDev/alphaModFreq         # Modulation index
 
 # next make an outlet
 outlet = StreamOutlet(info)
+previousRandSample = np.random.normal(noiseMean, noiseStdDev)   # initialize for 1/f noise 
+sample = np.empty(numOfChannel)           # create (blank) data array w/ entry for each channel
 
-print("now sending data...")
+print("\n \nSending data...")
 while True:
-<<<<<<< HEAD
-    # make a new random 8-channel sample; this is converted into a
-    # pylsl.vectorf (the data type that is expected by push_sample)
-    mysample = [signal + random.random(), 0, 0, 0, 0, 0, 0, 0]
-    # now send it and wait for a bit
-    outlet.push_sample(mysample)
-    time.sleep(1. / 256.)
-=======
-    
-    # channel1 = np.sin(1.0 * 2.0 * np.pi * time.time())  
-    # channel2 = np.sin(5.0 * 2.0 * np.pi * time.time())   
-    # channel3 = np.sin(10.0 * 2.0 * np.pi * time.time())   
-    # channel4 = np.sin(15.0 * 2.0 * np.pi * time.time())   
-    # channel5 = np.sin(10.0 * 2.0 * np.pi * time.time())   
-    # channel6 = np.sin(25.0 * 2.0 * np.pi * time.time())  
-    # channel7 = np.sin(10.0 * 2.0 * np.pi * time.time()) + random.random()
-    # channel8 = random.random()
-    
-    channel1 = 0.1*np.sin(10.0 * 2.0 * np.pi * time.time()) + random.random() 
-    channel2 = 0.2*np.sin(15.0 * 2.0 * np.pi * time.time()) + random.random()  
-    channel3 = 0.3*np.sin(20.0 * 2.0 * np.pi * time.time()) + random.random()  
-    channel4 = 0.4*np.sin(25.0 * 2.0 * np.pi * time.time()) + random.random()  
-    channel5 = 0.5*np.sin(30.0 * 2.0 * np.pi * time.time()) + random.random()  
-    channel6 = 0.6*np.sin(35.0 * 2.0 * np.pi * time.time()) + random.random()
-    channel7 = 0.7*np.sin(40.0 * 2.0 * np.pi * time.time()) + random.random()
-    channel8 = 0.8*np.sin(45.0 * 2.0 * np.pi * time.time()) + random.random()
-    
-    # each channel have a voltage value over time.
-    mysample = [channel1, channel2, channel3,
-                channel4, channel5, channel6,
-                channel7, channel8]
 
-    # now send it and wait for a bit
-    outlet.push_sample(mysample)
-    time.sleep(1.0/sampleRate)
->>>>>>> aacc66aa8ff55e57a29c499d25a3bbd585a74e6b
+	
+	# Constructs 1/f noise by iteratively adding normal random noise, effectively the CDF of normal dist.
+	nextRandSample = previousRandSample + np.random.normal(noiseMean, noiseStdDev)
+	
+	# Frequency modulated alpha rhythm, a sinusoidal baseband signal
+	alpha = alphaAmp*np.sin( alphaCenter  * 2.0 * np.pi * time.time() + \
+	alphaFreqDev*np.sin(2 * np.pi * alphaModFreq * time.time()) / alphaModFreq)
+	
+	# assign the weighted alpha rhythm + 1/f noise + additional random noise to each channel in sample
+	for channelIndex in range(0,numOfChannel):
+		sample[channelIndex] = channelWeights[channelIndex]*alpha + nextRandSample + 0.05*np.random.random()	
+	
+	# push sample
+	outlet.push_sample(sample)
+	
+	previousRandSample = nextRandSample 
+	
+	start = time.clock()
+	now = time.clock()
+	while now < start + 1/sampleRate:
+		now = time.clock()
+		pass
+	
+	
