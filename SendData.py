@@ -5,8 +5,8 @@ import numpy as np
 from pylsl import StreamInfo, StreamOutlet, vectorf
 
 for clearline in range(1,100):
-	print('\n')
-	
+    print('\n')
+
 sampleRate = 512.0
 info = StreamInfo('SimulatedEEG', 'EEG', 8, sampleRate, 'float32', 'myuid34234')
 
@@ -15,10 +15,12 @@ channelWeights = np.linspace(1./numOfChannel,1,numOfChannel)
 np.random.shuffle(channelWeights)
 print 'Channel weights:', '\n'
 for channelIndex in range(numOfChannel):
+
     print "        ", channelIndex+1, "   ", channelWeights[channelIndex]
 alphaCenter = 10.   # Hz the carrier frequency
 alphaModFreq = 0.1  # Hz the modulating frequency
 alphaFreqDev = 1    # Hz of the frequency deviation
+
 snr = 2             # signal / noise
 noiseMean = 0
 noiseStdDev = 0.5
