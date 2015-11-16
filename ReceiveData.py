@@ -37,11 +37,4 @@ while True:
 
     if sampleIndex == dataLengthSamples:
         processPAF.processPAF(voltageSamples,sampleRate)
-<<<<<<< HEAD
         sampleIndex = 0
-=======
-        sampleIndex = 0
-
-
-
->>>>>>> 478254401f8da067fdeabd50367aee17c2cde29a
