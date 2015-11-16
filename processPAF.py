@@ -7,6 +7,7 @@ from parabolic import parabolic
 import random
 import time
 import math
+from scipy.signal import butter, lfilter  
 
 def processPAF(voltageSamples,sampleRate):
     # Number of samplepoints
@@ -27,7 +28,10 @@ def processPAF(voltageSamples,sampleRate):
         channelVoltage = voltageSamples[channelIndex,:] - np.mean(voltageSamples[channelIndex,:])
 		
 		# filter data
-		
+              bandlow =8
+              bandhigh=12
+              orderfilter=4
+              channelVoltage = butter_bandpass_filter(channelVoltage,bandlow, bandhigh, 256,orderfilter)  
 		# window data
         windowed = channelVoltage * signal.blackmanharris(dataLengthSamples)
         #windowed = channelVoltage * signal.gaussian(dataLengthSamples, std=8,sym=False)
@@ -62,5 +66,9 @@ def processPAF(voltageSamples,sampleRate):
         ax2.grid()
 
         plt.show()
-
+#butter filter funtion         
+def butter_bandpass_filter(data, lowcut, highcut, fs, order=2):
+                  b, a = butter_bandpass(lowcut, highcut, fs, order)
+                  y = lfilter(b, a, data)
+                  return y
 
