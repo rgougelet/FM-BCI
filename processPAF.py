@@ -1,5 +1,6 @@
 import pylab
 import numpy as np
+import scipy as sp
 import matplotlib.pyplot as plt
 import scipy.fftpack
 from scipy import signal
@@ -31,7 +32,7 @@ def processPAF(voltageSamples,sampleRate):
               bandlow =8
               bandhigh=12
               orderfilter=4
-              channelVoltage = butter_bandpass_filter(channelVoltage,bandlow, bandhigh, 256,orderfilter)  
+              channelVoltage = butter_bandpass_filter(channelVoltage,bandlow, bandhigh,sampleRate,orderfilter)  
 		# window data
         windowed = channelVoltage * signal.blackmanharris(dataLengthSamples)
         #windowed = channelVoltage * signal.gaussian(dataLengthSamples, std=8,sym=False)
@@ -67,8 +68,18 @@ def processPAF(voltageSamples,sampleRate):
 
         plt.show()
 #butter filter funtion         
-def butter_bandpass_filter(data, lowcut, highcut, fs, order=2):
-                  b, a = butter_bandpass(lowcut, highcut, fs, order)
-                  y = lfilter(b, a, data)
-                  return y
+def butter_bandpass(lowcut, highcut, fs, order=4):
+    #lowcut is the lower bound of the frequency that we want to isolate
+    #hicut is the upper bound of the frequency that we want to isolate
+    #fs is the sampling rate of our data
+    nyq = 0.5 * fs #nyquist frequency - see http://www.dspguide.com/ if you want more info
+    low = float(lowcut) / nyq
+    high = float(highcut) / nyq
+    b, a = sp.signal.butter(order, [low, high], btype='band')
+    return b, a
+
+def butter_bandpass_filter(mydata, lowcut, highcut, fs, order=4):
+    b, a = butter_bandpass(lowcut, highcut, fs, order=order)
+    y = sp.signal.filtfilt(b, a, mydata)
+    return y
 
