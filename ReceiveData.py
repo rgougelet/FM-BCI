@@ -26,6 +26,8 @@ voltageSamples = np.empty([numOfChannel,dataLengthSamples])
 sampleIndex = 0
 sample = vectorf()
 
+paf = processPAF.PAF()
+
 while True:
     # get a new sample (you can also omit the timestamp part if you're not
     # interested in it)
@@ -36,5 +38,5 @@ while True:
     sampleIndex += 1
 
     if sampleIndex == dataLengthSamples:
-        processPAF.processPAF(voltageSamples,sampleRate)
+        paf.processPAF(voltageSamples,sampleRate)
         sampleIndex = 0
