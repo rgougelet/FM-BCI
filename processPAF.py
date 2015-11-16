@@ -25,7 +25,10 @@ def processPAF(voltageSamples,sampleRate):
 
         # detrend and window channel
         channelVoltage = voltageSamples[channelIndex,:] - np.mean(voltageSamples[channelIndex,:])
-        #channelVoltage = 0.2*np.sin(15.0 * 2.0 * np.pi * time) #+ random.random()  
+		
+		# filter data
+		
+		# window data
         windowed = channelVoltage * signal.blackmanharris(dataLengthSamples)
         #windowed = channelVoltage * signal.gaussian(dataLengthSamples, std=8,sym=False)
         
