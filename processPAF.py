@@ -1,5 +1,6 @@
 import pylab
 import numpy as np
+import scipy as sp
 import matplotlib.pyplot as plt
 import scipy.fftpack
 from scipy import signal
@@ -7,6 +8,7 @@ from parabolic import parabolic
 import random
 import time
 import math
+from scipy.signal import butter, lfilter  
 import record
 
 class PAF:
@@ -23,10 +25,6 @@ class PAF:
         # self.record_PAF('Row = Channel \nColumn = true max freq per sample rate \n')
 
 
-    def record_PAF(self, content):
-        self.recorder.write(content)
-
-        
     def process_PAF(self, voltageSamples,sampleRate):
         """ voltageSamples is a (numOfChannel X sampleSize) matrix """
 
@@ -51,15 +49,23 @@ class PAF:
             # detrend and window channel
             channelVoltage = voltageSamples[channelIndex,:] - np.mean(voltageSamples[channelIndex,:])
     		
-    		# filter data
+            # filter data
+            bandlow =8
+            bandhigh=12
+            orderfilter=4
+
+            channelVoltage = self.butter_bandpass_filter(channelVoltage,bandlow, bandhigh,sampleRate,orderfilter)      		
     		
-    		# window data
+            # window data
             windowed = channelVoltage * signal.blackmanharris(dataLengthSamples)
             #windowed = channelVoltage * signal.gaussian(dataLengthSamples, std=8,sym=False)
             
             # compute fft
             amp = abs(scipy.fftpack.rfft(channelVoltage,fftLengthSamples))
             freqs = scipy.fftpack.rfftfreq(fftLengthSamples,sampleSpacing)
+
+
+            # true_maxAmplitudeIndex and true_maxFreq causes divid by 0 exception sometimes so they are commented out
 
             # find peak frequency
             maxAmplitudeIndex = np.argmax(amp)
@@ -95,7 +101,7 @@ class PAF:
     #     print('Channel ' + str(channelIndex+1) + ':     ' + str(maxFreq))
 
     #     #  output frequency to file
-    #     self.record_PAF('Channel ' + str(channelIndex+1) + ':     ' + str(maxFreq)) 
+    #     self.recorder.write('Channel ' + str(channelIndex+1) + ':     ' + str(maxFreq)) 
 
 
 
@@ -117,6 +123,27 @@ class PAF:
         ax2.grid()
 
         plt.show()
+
+
+    def butter_bandpass_filter(self, mydata, lowcut, highcut, fs, order=4):
+        b, a = self.butter_bandpass(lowcut, highcut, fs, order=order)
+        y = sp.signal.filtfilt(b, a, mydata)
+        return y
+
+
+    # butter filter funtion       
+    def butter_bandpass(self, lowcut, highcut, fs, order=4):
+        """ A helper function of butter_bandpass_filter()
+            lowcut is the lower bound of the frequency that we want to isolate
+            hicut is the upper bound of the frequency that we want to isolate
+            fs is the sampling rate of our data
+        """
+        nyq = 0.5 * fs #nyquist frequency - see http://www.dspguide.com/ if you want more info
+        low = float(lowcut) / nyq
+        high = float(highcut) / nyq
+        b, a = sp.signal.butter(order, [low, high], btype='band')
+        return b, a
+
 
     def output_to_file_before_exit(self):
         """  output alpha peak frequency to file on KeyBoardInterrupt """
