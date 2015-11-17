@@ -14,9 +14,9 @@ numOfChannel = 8
 channelWeights = np.linspace(1./numOfChannel,1,numOfChannel) 
 np.random.shuffle(channelWeights)
 print 'Channel weights:', '\n'
-for channelIndex in range(numOfChannel):
+for channel_index in range(numOfChannel):
 
-    print "        ", channelIndex+1, "   ", channelWeights[channelIndex]
+    print "        ", channel_index+1, "   ", channelWeights[channel_index]
 alphaCenter = 10.   # Hz the carrier frequency
 alphaModFreq = 0.1  # Hz the modulating frequency
 alphaFreqDev = 1    # Hz of the frequency deviation
@@ -35,6 +35,7 @@ previousRandSample = np.random.normal(noiseMean, noiseStdDev)   # initialize for
 sample = np.empty(numOfChannel)           # create (blank) data array w/ entry for each channel
 
 print("\n \nSending data...")
+
 while True:
 
     # Constructs 1/f noise by iteratively adding normal random noise, effectively the CDF of normal dist.
@@ -45,8 +46,8 @@ while True:
     alphaFreqDev*np.sin(2 * np.pi * alphaModFreq * time.time()) / alphaModFreq)
     
     # assign the weighted alpha rhythm + 1/f noise + additional random noise to each channel in sample
-    for channelIndex in range(0,numOfChannel):
-        sample[channelIndex] = channelWeights[channelIndex]*alpha + nextRandSample + 0.05*np.random.random()    
+    for channel_index in range(0,numOfChannel):
+        sample[channel_index] = channelWeights[channel_index]*alpha + nextRandSample + 0.05*np.random.random()    
     
     # push sample
     outlet.push_sample(sample)
@@ -55,6 +56,7 @@ while True:
     
     start = time.clock()
     now = time.clock()
+
     while now < start + 1/sampleRate:
         now = time.clock()
         pass

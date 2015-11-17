@@ -28,15 +28,23 @@ sample = vectorf()
 
 paf = processPAF.PAF()
 
-while True:
-    # get a new sample (you can also omit the timestamp part if you're not
-    # interested in it)
-    sample, timestamp = inlet.pull_sample()
-    
-    # populating the samples
-    voltageSamples[:, sampleIndex] = sample
-    sampleIndex += 1
+try:
+    while True:
+        # get a new sample (you can also omit the timestamp part if you're not
+        # interested in it)
+        sample, timestamp = inlet.pull_sample()
+        
+        # populating the samples
+        voltageSamples[:, sampleIndex] = sample
+        sampleIndex += 1
 
-    if sampleIndex == dataLengthSamples:
-        paf.processPAF(voltageSamples,sampleRate)
-        sampleIndex = 0
+        if sampleIndex == dataLengthSamples:
+            paf.process_PAF(voltageSamples,sampleRate)
+            sampleIndex = 0
+
+except KeyboardInterrupt:
+    # Write to file before exit
+    paf.output_to_file_before_exit()
+    raise
+
+

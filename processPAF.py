@@ -9,26 +9,30 @@ import time
 import math
 import record
 
-class PAF(object):
-    """docstring for PAF"""
+class PAF:
+    """ PAF is used to process the peak alpha frequency giving voltage samples and sample rates"""
 
-    recorder = None
-    peakAlphaFrequency = []
-    peakFrequencyDifference = []
+    recorder = None   # used to record paf
+
+    # peak_alpha_freq is a (numOfChanels X numOfSamples) matrix 
+    peak_alpha_freq = np.zeros([8, 1])
 
     def __init__(self):
         self.recorder = record.Record()
-        self.recordPAF('ChannelIndex: trueMaxFreq   peakDifference \n')
-        # self.recorder.write("success")
-        self.peakAlphaFrequency.append(0);      # For calculating differences
+        # self.recorder.record_new()
+        # self.record_PAF('Row = Channel \nColumn = true max freq per sample rate \n')
 
-    def recordPAF(self, content):
+
+    def record_PAF(self, content):
         self.recorder.write(content)
+
         
-    def processPAF(self, voltageSamples,sampleRate):
+    def process_PAF(self, voltageSamples,sampleRate):
+        """ voltageSamples is a (numOfChannel X sampleSize) matrix """
+
         # Number of samplepoints
-        numOfChannel = voltageSamples.shape[0]     # number of channels
-        dataLengthSamples = voltageSamples.shape[1]        # sample size
+        numOfChannel = voltageSamples.shape[0]              # number of channels
+        dataLengthSamples = voltageSamples.shape[1]         # sample size
         sampleSpacing = 1.0 / sampleRate        
         dataLengthSecs = dataLengthSamples/sampleRate
         desiredFreqResolution = 1
@@ -36,6 +40,10 @@ class PAF(object):
         fftLengthSamples = dataLengthSamples*int(paddingMultiple)
         nyq = 0.5*sampleRate
         time = np.arange(0,dataLengthSecs,sampleSpacing)
+
+
+        # contains data from all eight channels per sample as a column
+        dataPerSampleRate = []
 
         # going through each channel to plot fft result 
         for channelIndex in range(0,numOfChannel):
@@ -59,32 +67,39 @@ class PAF(object):
             maxFreq = nyq * maxAmplitudeIndex / fftLengthSamples
             # true_maxFreq = nyq * true_maxAmplitudeIndex / fftLengthSamples
             # print('Channel '+str(channelIndex+1)+':     '+str(true_maxFreq)+'  '+str(maxFreq))
+            print('Channel '+str(channelIndex+1)+':     '+str(maxFreq))
 
-            self.recordPeak(channelIndex, maxFreq)
 
+            # save sample to dataPerSampleRate
+            dataPerSampleRate.append(maxFreq)    
 
             # do not run this cuz you are gonna get bombarded with plots
-            # self.plotPAF()
+            # self.plot(channelIndex, channelVoltage, freqs, amp, maxAmplitudeIndex)
+
+        # append dataPerSampleRate as column to the peak_alpha_freq array
+        self.peak_alpha_freq = np.c_[ self.peak_alpha_freq, dataPerSampleRate] 
+        # print self.peak_alpha_freq
 
 
-    def recordPeak(self, channelIndex, true_maxFreq):
-        """ get the current true_maxFreq and calculate the peak differences and record it to txt file"""
-        # find peak difference between current peak and previous peak
-        peakDifference = true_maxFreq - self.peakAlphaFrequency[-1]
-        self.peakFrequencyDifference.append(peakDifference)
-        # populate peakAlphaFrequency
-        self.peakAlphaFrequency.append(true_maxFreq)
-        # print self.peakAlphaFrequency
+    def record_peak(self):
+        """ recording the peak at the end of the application all at once in pretty printing"""
+        self.recorder.record_raw(self.peak_alpha_freq)
 
-        # testing
-        print('Channel ' + str(channelIndex+1) + ':     ' + str(true_maxFreq) + '      ' + str(peakDifference))
+    # def record_peak_2(self, channelIndex, maxFreq):
+    #     """ record maxFreq to txt file"""
 
-        #  output frequency to file
-        self.recordPAF('Channel ' + str(channelIndex+1) + ':     ' + str(true_maxFreq) + '      ' + str(peakDifference)) 
+    #     # populate peak_alpha_freq
+    #     # self.peak_alpha_freq.append(maxFreq)
+
+    #     # testing
+    #     print('Channel ' + str(channelIndex+1) + ':     ' + str(maxFreq))
+
+    #     #  output frequency to file
+    #     self.record_PAF('Channel ' + str(channelIndex+1) + ':     ' + str(maxFreq)) 
 
 
 
-    def plotPAF(self):
+    def plot(self, channelIndex, channelVoltage, freqs, amp, maxAmplitudeIndex):
         """ plot the figures """
         fig=plt.figure(figsize=(12, 9))
         ax1=fig.add_subplot(211)
@@ -102,4 +117,12 @@ class PAF(object):
         ax2.grid()
 
         plt.show()
+
+    def output_to_file_before_exit(self):
+        """  output alpha peak frequency to file on KeyBoardInterrupt """
+        self.record_peak()
+        print 'Saved Data:'
+        print self.peak_alpha_freq
+        print 'Data has been recorded and saved in /recordings!'
+
 

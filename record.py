@@ -2,43 +2,46 @@ import os
 import errno
 import time
 import shutil
+import numpy as np
 
-class Record(object):
-
-    target = None
+class Record:
+    target = None     # the target file to write to
 
     def __init__(self):
         self.create_directory("./recordings")
-        # filename = raw_input("Please enter a file name for this recording: ")
-        filename = time.strftime("%H:%M:%S-%d-%m-%Y")
-        self.target = open (os.path.join("./recordings", filename + ".txt"), 'a') ## a will append, w will over-write
-        self.target.write("EEG recorded on "+ time.strftime("%d/%m/%Y")+ " at "+time.strftime("%H:%M:%S")+"\n\n\n")
 
 
     def create_directory(self, path):
-        """create directories for eeg recordings
-        """
+        """ create directories for eeg recordings"""
         try:
             os.makedirs(path)
         except OSError as exception:
             if exception.errno != errno.EEXIST:
                 raise
        
+
     def write(self, content):
         if self.target != None:
             self.target.write('%s' % content)
             self.target.write("\n")
 
-    def deleteRecordings(self):
+
+    def record_raw(self, content):
+        filename = time.strftime("./recordings/%H:%M:%S-%d-%m-%Y")
+        # %.5f specifies 5 decimal round
+        np.savetxt(filename,content,fmt='%.5f')    
+
+
+    def delete_recordings(self):
         shutil.rmtree('./recordings')
 
 
     #providing name for the file to be created
-    def begin_recording(self):
-        create_directory("./recordings")
+    def record_new(self):
         # filename = raw_input("Please enter a file name for this recording: ")
         filename = time.strftime("%H:%M:%S-%d-%m-%Y")
-        target = open (os.path.join("./recordings", filename + ".txt"), 'a') ## a will append, w will over-write 
+        self.target = open (os.path.join("./recordings", filename + ".txt"), 'a') ## a will append, w will over-write
+        self.target.write("EEG recorded on "+ time.strftime("%d/%m/%Y")+ " at "+time.strftime("%H:%M:%S")+"\n\n\n")
         
 
     # def writeTest(self):
@@ -61,5 +64,5 @@ class Record(object):
 
 
 # r1 = Record()
-# # r1.deleteRecordings()
+# # r1.delete_recordings()
 # r1.write("frequency")
