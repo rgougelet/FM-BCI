@@ -19,10 +19,11 @@ class PAF:
     # peak_alpha_freq is a (numOfChanels X numOfSamples) matrix 
     peak_alpha_freq = np.zeros([8, 1])
 
+
     def __init__(self):
         self.recorder = record.Record()
-        # self.recorder.record_new()
-        # self.record_PAF('Row = Channel \nColumn = true max freq per sample rate \n')
+        self.recorder.record_new()
+        self.recorder.write('Row = Channel \nColumn = true max freq per sample rate \n')
 
 
     def process_PAF(self, voltageSamples,sampleRate):
@@ -36,7 +37,7 @@ class PAF:
         desiredFreqResolution = 1
         paddingMultiple = 1./desiredFreqResolution
         fftLengthSamples = dataLengthSamples*int(paddingMultiple)
-        nyq = 0.5*sampleRate
+        nyq = 0.5 * sampleRate
         time = np.arange(0,dataLengthSecs,sampleSpacing)
 
 
@@ -49,10 +50,10 @@ class PAF:
             # detrend and window channel
             channelVoltage = voltageSamples[channelIndex,:] - np.mean(voltageSamples[channelIndex,:])
     		
-            # filter data
-            bandlow =8
-            bandhigh=12
-            orderfilter=4
+            # filter data for alpha frequency
+            bandlow = 8
+            bandhigh = 12
+            orderfilter = 4
 
             channelVoltage = self.butter_bandpass_filter(channelVoltage,bandlow, bandhigh,sampleRate,orderfilter)      		
     		
@@ -87,21 +88,25 @@ class PAF:
         # print self.peak_alpha_freq
 
 
-    def record_peak(self):
-        """ recording the peak at the end of the application all at once in pretty printing"""
-        self.recorder.record_raw(self.peak_alpha_freq)
 
-    # def record_peak_2(self, channelIndex, maxFreq):
-    #     """ record maxFreq to txt file"""
+    def butter_bandpass_filter(self, mydata, lowcut, highcut, fs, order=4):
+        b, a = self.butter_bandpass(lowcut, highcut, fs, order=order)
+        y = sp.signal.filtfilt(b, a, mydata)
+        return y
 
-    #     # populate peak_alpha_freq
-    #     # self.peak_alpha_freq.append(maxFreq)
 
-    #     # testing
-    #     print('Channel ' + str(channelIndex+1) + ':     ' + str(maxFreq))
-
-    #     #  output frequency to file
-    #     self.recorder.write('Channel ' + str(channelIndex+1) + ':     ' + str(maxFreq)) 
+    # butter filter funtion       
+    def butter_bandpass(self, lowcut, highcut, fs, order=4):
+        """ A helper function of butter_bandpass_filter()
+            lowcut is the lower bound of the frequency that we want to isolate
+            hicut is the upper bound of the frequency that we want to isolate
+            fs is the sampling rate of our data
+        """
+        nyq = 0.5 * fs #nyquist frequency - see http://www.dspguide.com/ if you want more info
+        low = float(lowcut) / nyq
+        high = float(highcut) / nyq
+        b, a = sp.signal.butter(order, [low, high], btype='band')
+        return b, a
 
 
 
@@ -125,24 +130,22 @@ class PAF:
         plt.show()
 
 
-    def butter_bandpass_filter(self, mydata, lowcut, highcut, fs, order=4):
-        b, a = self.butter_bandpass(lowcut, highcut, fs, order=order)
-        y = sp.signal.filtfilt(b, a, mydata)
-        return y
+    def record_peak(self):
+        """ recording the peak at the end of the application all at once in pretty printing"""
+        # self.recorder.record_raw(self.peak_alpha_freq)
+        self.recorder.write(self.peak_alpha_freq)
 
+    # def record_peak_2(self, channelIndex, maxFreq):
+    #     """ record maxFreq to txt file"""
 
-    # butter filter funtion       
-    def butter_bandpass(self, lowcut, highcut, fs, order=4):
-        """ A helper function of butter_bandpass_filter()
-            lowcut is the lower bound of the frequency that we want to isolate
-            hicut is the upper bound of the frequency that we want to isolate
-            fs is the sampling rate of our data
-        """
-        nyq = 0.5 * fs #nyquist frequency - see http://www.dspguide.com/ if you want more info
-        low = float(lowcut) / nyq
-        high = float(highcut) / nyq
-        b, a = sp.signal.butter(order, [low, high], btype='band')
-        return b, a
+    #     # populate peak_alpha_freq
+    #     # self.peak_alpha_freq.append(maxFreq)
+
+    #     # testing
+    #     print('Channel ' + str(channelIndex+1) + ':     ' + str(maxFreq))
+
+    #     #  output frequency to file
+    #     self.recorder.write('Channel ' + str(channelIndex+1) + ':     ' + str(maxFreq)) 
 
 
     def output_to_file_before_exit(self):
