@@ -12,32 +12,46 @@ from scipy.signal import butter, lfilter
 import record
 
 class PAF:
-    """ PAF is used to process the peak alpha frequency giving voltage samples and sample rates"""
+    """ PAF is used to process the peak alpha frequency giving voltage samples and sample rate"""
 
-    recorder = None   # used to record paf
+    sample_rate = 256.                          # sampling rate
 
-    # peak_alpha_freq is a (numOfChanels X numOfSamples) matrix 
-    peak_alpha_freq = np.zeros([8, 1])
+    band_low = 8                                # lower alpha band 
 
+    band_high = 12                              # higher alpha band
 
-    def __init__(self):
+    order_filter = 4                            # filter order
+
+    peak_alpha_freq = np.zeros([8, 1])          # peak_alpha_freq is a (numOfChanels X numOfSamples) matrix 
+
+    recorder = None                             # used to record paf
+
+    def __init__(self, sampleRate, bandLow, bandHigh, orderFilter):
+        # intialize the filters
+        self.band_low = bandLow
+        self.band_high = bandHigh
+        self.order_filter = orderFilter
+
+        self.sample_rate = sampleRate
+
+        # Initialize the recorder 
         self.recorder = record.Record()
         self.recorder.record_new()
         self.recorder.write('Row = Channel \nColumn = true max freq per sample rate \n')
 
 
-    def process_PAF(self, voltageSamples,sampleRate):
+    def process_PAF(self, voltageSamples):
         """ voltageSamples is a (numOfChannel X sampleSize) matrix """
 
         # Number of samplepoints
         numOfChannel = voltageSamples.shape[0]              # number of channels
         dataLengthSamples = voltageSamples.shape[1]         # sample size
-        sampleSpacing = 1.0 / sampleRate        
-        dataLengthSecs = dataLengthSamples/sampleRate
+        sampleSpacing = 1.0 / self.sample_rate        
+        dataLengthSecs = dataLengthSamples / self.sample_rate
         desiredFreqResolution = 1
         paddingMultiple = 1./desiredFreqResolution
         fftLengthSamples = dataLengthSamples*int(paddingMultiple)
-        nyq = 0.5 * sampleRate
+        nyq = 0.5 * self.sample_rate
         time = np.arange(0,dataLengthSecs,sampleSpacing)
 
 
@@ -50,12 +64,7 @@ class PAF:
             # detrend and window channel
             channelVoltage = voltageSamples[channelIndex,:] - np.mean(voltageSamples[channelIndex,:])
     		
-            # filter data for alpha frequency
-            bandlow = 8
-            bandhigh = 12
-            orderfilter = 4
-
-            channelVoltage = self.butter_bandpass_filter(channelVoltage,bandlow, bandhigh,sampleRate,orderfilter)      		
+            channelVoltage = self.butter_bandpass_filter(channelVoltage, self.band_low, self.band_high, self.sample_rate, self.order_filter)      		
     		
             # window data
             windowed = channelVoltage * signal.blackmanharris(dataLengthSamples)
@@ -73,9 +82,9 @@ class PAF:
             # true_maxAmplitudeIndex = parabolic(np.log(amp), maxAmplitudeIndex)[0]
             maxFreq = nyq * maxAmplitudeIndex / fftLengthSamples
             # true_maxFreq = nyq * true_maxAmplitudeIndex / fftLengthSamples
+
             # print('Channel '+str(channelIndex+1)+':     '+str(true_maxFreq)+'  '+str(maxFreq))
             print('Channel '+str(channelIndex+1)+':     '+str(maxFreq))
-
 
             # save sample to dataPerSampleRate
             dataPerSampleRate.append(maxFreq)    
@@ -154,8 +163,8 @@ class PAF:
         # print 'Saved Data:'
         # print self.peak_alpha_freq
         for clearline in range(1,10):   print('\n')
-        print '\nData has been recorded and saved in:  ./recordings/' + str(self.recorder.file_name) + '.txt'
-        print '\nFor opening the recording file on mac: open ./recordings/' + str(self.recorder.file_name) + '.txt'
+        print '\nData has been recorded and saved in:   ./recordings/' + str(self.recorder.file_name) + '.txt'
+        print '\nTo open the recording file on mac:     open ./recordings/' + str(self.recorder.file_name) + '.txt'
         for clearline in range(1,10):   print('\n')
 
 

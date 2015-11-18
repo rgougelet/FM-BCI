@@ -26,7 +26,12 @@ voltageSamples = np.empty([numOfChannel,dataLengthSamples])
 sampleIndex = 0
 sample = vectorf()
 
-paf = processPAF.PAF()
+bandLow = 8                                # lower alpha band 
+bandHigh = 12                              # higher alpha band
+orderFilter = 4  
+
+paf = processPAF.PAF(sampleRate, bandLow, bandHigh, orderFilter)   # PAF(sampleRate, bandLow, bandHigh, orderFilter):
+
 
 try:
     while True:
@@ -39,7 +44,7 @@ try:
         sampleIndex += 1
 
         if sampleIndex == dataLengthSamples:
-            paf.process_PAF(voltageSamples,sampleRate)
+            paf.process_PAF(voltageSamples)
             sampleIndex = 0
 
 except KeyboardInterrupt:
