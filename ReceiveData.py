@@ -18,9 +18,9 @@ streams = resolve_stream('name', 'SimulatedEEG')
 inlet = StreamInlet(streams[0])
 
 # populate the array in real time
-sampleRate = 512. # make sure this matches the sampleRate in SendData.py
+sampleRate = 1024. # make sure this matches the sampleRate in SendData.py
 numOfChannel = 8
-dataLengthSecs = 1
+dataLengthSecs = 5
 dataLengthSamples = dataLengthSecs*sampleRate
 voltageSamples = np.empty([numOfChannel,dataLengthSamples])
 sampleIndex = 0
