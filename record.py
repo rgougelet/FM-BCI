@@ -4,7 +4,7 @@ import time
 import shutil
 import numpy as np
 
-class Record:
+class Recorder:
 
     target_file = None     # the target_file file to write to
 

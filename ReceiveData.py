@@ -19,10 +19,10 @@ inlet = StreamInlet(streams[0])
 
 # populate the array in real time
 sampleRate = 512. # make sure this matches the sampleRate in SendData.py
-numOfChannel = 8
+numOfChannels = 8
 dataLengthSecs = 1
 dataLengthSamples = dataLengthSecs*sampleRate
-voltageSamples = np.empty([numOfChannel,dataLengthSamples])
+voltageSamples = np.empty([numOfChannels,dataLengthSamples])
 sampleIndex = 0
 sample = vectorf()
 
@@ -30,7 +30,8 @@ bandLow = 8                                # lower alpha band
 bandHigh = 12                              # higher alpha band
 orderFilter = 4  
 
-paf = processPAF.PAF(sampleRate, bandLow, bandHigh, orderFilter)   # PAF(sampleRate, bandLow, bandHigh, orderFilter):
+# PAF(numOfChannels, sampleRate, bandLow, bandHigh, orderFilter)
+paf = processPAF.PAF(numOfChannels, sampleRate, bandLow, bandHigh, orderFilter)   
 
 
 try:

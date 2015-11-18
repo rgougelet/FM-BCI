@@ -10,11 +10,11 @@ for clearline in range(1,100):
 sampleRate = 512.0
 info = StreamInfo('SimulatedEEG', 'EEG', 8, sampleRate, 'float32', 'myuid34234')
 
-numOfChannel = 8
-channelWeights = np.linspace(1./numOfChannel,1,numOfChannel) 
+numOfChannelss = 8
+channelWeights = np.linspace(1./numOfChannelss,1,numOfChannelss) 
 np.random.shuffle(channelWeights)
 print 'Channel weights:', '\n'
-for channel_index in range(numOfChannel):
+for channel_index in range(numOfChannelss):
 
     print "        ", channel_index+1, "   ", channelWeights[channel_index]
 alphaCenter = 10.   # Hz the carrier frequency
@@ -32,7 +32,7 @@ h = alphaFreqDev/alphaModFreq         # Modulation index
 # next make an outlet
 outlet = StreamOutlet(info)
 previousRandSample = np.random.normal(noiseMean, noiseStdDev)   # initialize for 1/f noise 
-sample = np.empty(numOfChannel)           # create (blank) data array w/ entry for each channel
+sample = np.empty(numOfChannelss)           # create (blank) data array w/ entry for each channel
 
 print("\n \nSending data...")
 
@@ -46,7 +46,7 @@ while True:
     alphaFreqDev*np.sin(2 * np.pi * alphaModFreq * time.time()) / alphaModFreq)
     
     # assign the weighted alpha rhythm + 1/f noise + additional random noise to each channel in sample
-    for channel_index in range(0,numOfChannel):
+    for channel_index in range(0,numOfChannelss):
         sample[channel_index] = channelWeights[channel_index]*alpha + nextRandSample + 0.05*np.random.random()    
     
     # push sample

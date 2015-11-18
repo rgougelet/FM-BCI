@@ -2,6 +2,7 @@ import pylab
 import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
+import matplotlib.animation as anim
 import scipy.fftpack
 from scipy import signal
 from parabolic import parabolic
@@ -10,41 +11,49 @@ import time
 import math
 from scipy.signal import butter, lfilter  
 import record
+import sys
 
 class PAF:
     """ PAF is used to process the peak alpha frequency giving voltage samples and sample rate"""
 
-    sample_rate = 256.                          # sampling rate
+    # sample_rate = 256.                          # sampling rate, default 256
 
-    band_low = 8                                # lower alpha band 
+    # band_low = 8                                # lower alpha band, default 8
 
-    band_high = 12                              # higher alpha band
+    # band_high = 12                              # higher alpha band, default 12
 
-    order_filter = 4                            # filter order
+    # order_filter = 4                            # filter order, default 4
 
-    peak_alpha_freq = np.zeros([8, 1])          # peak_alpha_freq is a (numOfChanels X numOfSamples) matrix 
+    # peak_alpha_freq = np.zeros([8, 1])          # peak_alpha_freq is a (numOfChannels X numOfSamples) matrix 
 
-    recorder = None                             # used to record paf
+    # recorder = None                             # used to record paf
 
-    def __init__(self, sampleRate, bandLow, bandHigh, orderFilter):
-        # intialize the filters
+    def __init__(self, numOfChannels, sampleRate, bandLow, bandHigh, orderFilter):
+        self.sample_rate = sampleRate                             # sampling rate, default 256
+        self.num_of_channels = numOfChannels
+        
+        self.peak_alpha_freq = np.zeros([numOfChannels, 1])       # peak_alpha_freq is a (numOfChannels X numOfSamples) matrix 
+        
+        # intialize the filter bands from 8 to 12 with filter order = 4
         self.band_low = bandLow
         self.band_high = bandHigh
-        self.order_filter = orderFilter
-
-        self.sample_rate = sampleRate
+        self.order_filter = orderFilter                           
 
         # Initialize the recorder 
-        self.recorder = record.Record()
+        self.recorder = record.Recorder()
         self.recorder.record_new()
         self.recorder.write('Row = Channel \nColumn = true max freq per sample rate \n')
 
 
     def process_PAF(self, voltageSamples):
-        """ voltageSamples is a (numOfChannel X sampleSize) matrix """
+        """ voltageSamples is a (numOfChannels X sampleSize) matrix """
 
         # Number of samplepoints
-        numOfChannel = voltageSamples.shape[0]              # number of channels
+        numOfChannels = voltageSamples.shape[0]              # number of channels
+
+        if numOfChannels != self.num_of_channels:
+            self.warning("The number of channels specified in object initialization differs from that in voltageSamples")
+
         dataLengthSamples = voltageSamples.shape[1]         # sample size
         sampleSpacing = 1.0 / self.sample_rate        
         dataLengthSecs = dataLengthSamples / self.sample_rate
@@ -59,7 +68,7 @@ class PAF:
         dataPerSampleRate = []
 
         # going through each channel to plot fft result 
-        for channelIndex in range(0,numOfChannel):
+        for channelIndex in range(0,numOfChannels):
 
             # detrend and window channel
             channelVoltage = voltageSamples[channelIndex,:] - np.mean(voltageSamples[channelIndex,:])
@@ -122,8 +131,9 @@ class PAF:
     def plot(self, channelIndex, channelVoltage, freqs, amp, maxAmplitudeIndex):
         """ plot the figures """
         fig=plt.figure(figsize=(12, 9))
-        ax1=fig.add_subplot(211)
         fig.suptitle('Channel '+str(channelIndex+1), fontsize=20)
+
+        ax1=fig.add_subplot(211)
         ax1.set_xlabel('Time [s]')
         ax1.set_ylabel('Voltage [V]')
         ax1.plot(channelVoltage)
@@ -156,6 +166,9 @@ class PAF:
     #     #  output frequency to file
     #     self.recorder.write('Channel ' + str(channelIndex+1) + ':     ' + str(maxFreq)) 
 
+    def warning (self, message):
+        print "Warning: " + str(message)
+        exit()
 
     def output_to_file_before_exit(self):
         """  output alpha peak frequency to file on KeyBoardInterrupt """
