@@ -26,15 +26,29 @@ voltageSamples = np.empty([numOfChannel,dataLengthSamples])
 sampleIndex = 0
 sample = vectorf()
 
-while True:
-    # get a new sample (you can also omit the timestamp part if you're not
-    # interested in it)
-    sample, timestamp = inlet.pull_sample()
-    
-    # populating the samples
-    voltageSamples[:, sampleIndex] = sample
-    sampleIndex += 1
+bandLow = 8                                # lower alpha band 
+bandHigh = 12                              # higher alpha band
+orderFilter = 4  
 
-    if sampleIndex == dataLengthSamples:
-        processPAF.processPAF(voltageSamples,sampleRate)
-        sampleIndex = 0
+paf = processPAF.PAF(sampleRate, bandLow, bandHigh, orderFilter)   # PAF(sampleRate, bandLow, bandHigh, orderFilter):
+
+try:
+    while True:
+        # get a new sample (you can also omit the timestamp part if you're not
+        # interested in it)
+        sample, timestamp = inlet.pull_sample()
+        
+        # populating the samples
+        voltageSamples[:, sampleIndex] = sample
+        sampleIndex += 1
+
+        if sampleIndex == dataLengthSamples:
+            paf.process_PAF(voltageSamples)
+            sampleIndex = 0
+
+except KeyboardInterrupt:
+    # Write to file before exit
+    paf.output_to_file_before_exit()
+    raise
+
+

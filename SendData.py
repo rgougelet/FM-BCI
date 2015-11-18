@@ -59,6 +59,7 @@ while True:
     # wait precisely between samples
     start = time.clock()
     now = time.clock()
+
     while now < start + 1/sampleRate:
         now = time.clock()
         pass
