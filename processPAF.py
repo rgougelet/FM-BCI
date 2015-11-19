@@ -30,8 +30,8 @@ class PAF:
 
         # Initialize the recorder 
         self.recorder = record.Recorder()
-        self.recorder.record_new()
-        self.recorder.write('Row = Channel \nColumn = true max freq per sample rate \n')
+        # self.recorder.record_new()
+        # self.recorder.write('Row = Channel \nColumn = true max freq per sample rate \n')
 
     def process_PAF(self, voltageSamples):
         """ voltageSamples is a (numOfChannel X sampleSize) matrix """
@@ -104,7 +104,7 @@ class PAF:
         meanChannelsPeaks = np.transpose(np.mean(channelPeaks,1))
         
         self.peak_alpha_freq = meanChannelsPeaks
-        self.record_peak(self.peak_alpha_freq)
+        # self.record_peak(self.peak_alpha_freq)
         
         # append outputColData as column to the peak_alpha_freq array
         self.peak_alpha_freqs = np.c_[ self.peak_alpha_freqs, self.peak_alpha_freq] 
@@ -157,9 +157,6 @@ class PAF:
         self.recorder.record_raw(self.peak_alpha_freqs.transpose())
         # print 'Saved Data:'
         # print self.peak_alpha_freq
-        for clearline in range(1,10):   print('\n')
-        print '\nData has been recorded and saved in:   ./recordings/' + str(self.recorder.file_name) + '.txt'
-        print '\nTo open the recording file on mac:     open ./recordings/' + str(self.recorder.file_name) + '.txt'
-        for clearline in range(1,10):   print('\n')
+
 
 
