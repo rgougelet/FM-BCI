@@ -13,26 +13,16 @@ from scipy.signal import butter, lfilter
 import record
 import sys
 
+
 class PAF:
     """ PAF is used to process the peak alpha frequency giving voltage samples and sample rate"""
 
-    # sample_rate = 256.                          # sampling rate, default 256
 
-    # band_low = 8                                # lower alpha band, default 8
-
-    # band_high = 12                              # higher alpha band, default 12
-
-    # order_filter = 4                            # filter order, default 4
-
-    # peak_alpha_freq = np.zeros([8, 1])          # peak_alpha_freq is a (numOfChannels X numOfSamples) matrix 
-
-    # recorder = None                             # used to record paf
-
-    def __init__(self, numOfChannels, sampleRate, bandLow, bandHigh, orderFilter):
+    def __init__(self, numOfChannelss, sampleRate, bandLow, bandHigh, orderFilter):
         self.sample_rate = sampleRate                             # sampling rate, default 256
-        self.num_of_channels = numOfChannels
+        self.num_of_channels = numOfChannelss
         
-        self.peak_alpha_freq = np.zeros([numOfChannels, 1])       # peak_alpha_freq is a (numOfChannels X numOfSamples) matrix 
+        self.peak_alpha_freq = np.zeros([numOfChannelss, 1])       # peak_alpha_freq is a (numOfChannelss X numOfSamples) matrix 
         
         # intialize the filter bands from 8 to 12 with filter order = 4
         self.band_low = bandLow
@@ -46,12 +36,12 @@ class PAF:
 
 
     def process_PAF(self, voltageSamples):
-        """ voltageSamples is a (numOfChannels X sampleSize) matrix """
+        """ voltageSamples is a (numOfChannelss X sampleSize) matrix """
 
         # Number of samplepoints
-        numOfChannels = voltageSamples.shape[0]              # number of channels
+        numOfChannelss = voltageSamples.shape[0]              # number of channels
 
-        if numOfChannels != self.num_of_channels:
+        if numOfChannelss != self.num_of_channels:
             self.warning("The number of channels specified in object initialization differs from that in voltageSamples")
 
         dataLengthSamples = voltageSamples.shape[1]         # sample size
@@ -68,7 +58,7 @@ class PAF:
         dataPerSampleRate = []
 
         # going through each channel to plot fft result 
-        for channelIndex in range(0,numOfChannels):
+        for channelIndex in range(0,numOfChannelss):
 
             # detrend and window channel
             channelVoltage = voltageSamples[channelIndex,:] - np.mean(voltageSamples[channelIndex,:])
@@ -107,9 +97,9 @@ class PAF:
 
 
 
-    def butter_bandpass_filter(self, mydata, lowcut, highcut, fs, order=4):
+    def butter_bandpass_filter(self, my_paf , lowcut, highcut, fs, order=4):
         b, a = self.butter_bandpass(lowcut, highcut, fs, order=order)
-        y = sp.signal.filtfilt(b, a, mydata)
+        y = sp.signal.filtfilt(b, a, my_paf )
         return y
 
 
@@ -142,10 +132,9 @@ class PAF:
         ax2=fig.add_subplot(212)
         ax2.set_xlabel('Frequency [Hz]')
         ax2.set_ylabel('Amplitude')
-        ax2.plot(freqs, amp)
-        ax2.plot(freqs[maxAmplitudeIndex], amp[maxAmplitudeIndex], 'rD')   # highest frequency marker
+        ax2.plot(freqs, np.mean(channelWinSpectra,1))
+        # ax2.plot(freqs[maxAmplitudeIndex], amp[maxAmplitudeIndex], 'rD')   # highest frequency marker
         ax2.grid()
-
         plt.show()
 
 
@@ -154,17 +143,6 @@ class PAF:
         # self.recorder.record_raw(self.peak_alpha_freq)
         self.recorder.write(self.peak_alpha_freq)
 
-    # def record_peak_2(self, channelIndex, maxFreq):
-    #     """ record maxFreq to txt file"""
-
-    #     # populate peak_alpha_freq
-    #     # self.peak_alpha_freq.append(maxFreq)
-
-    #     # testing
-    #     print('Channel ' + str(channelIndex+1) + ':     ' + str(maxFreq))
-
-    #     #  output frequency to file
-    #     self.recorder.write('Channel ' + str(channelIndex+1) + ':     ' + str(maxFreq)) 
 
     def warning (self, message):
         print "Warning: " + str(message)

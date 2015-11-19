@@ -1,8 +1,12 @@
 import matplotlib.pyplot as plt
+import numpy as np
+import time
+
 plt.ion()
 
+# plot peak alpha as a function of time
 
-class DynamicUpdate():
+class Plot():
     #Suppose we know the x range
     min_x = 0
     max_x = 10
@@ -16,12 +20,12 @@ class DynamicUpdate():
         self.ax.set_xlim(self.min_x, self.max_x)
         #Other stuff
         self.ax.grid()
-        ...
+        # ...
 
-    def on_running(self, xdata, ydata):
+    def on_running(self, x_time, y_paf):
         #Update data (with the new _and_ the old points)
-        self.lines.set_xdata(xdata)
-        self.lines.set_ydata(ydata)
+        self.lines.set_xdata(x_time)
+        self.lines.set_ydata(y_paf)
         #Need both of these in order to rescale
         self.ax.relim()
         self.ax.autoscale_view()
@@ -31,17 +35,15 @@ class DynamicUpdate():
 
     #Example
     def __call__(self):
-        import numpy as np
-        import time
         self.on_launch()
-        xdata = []
-        ydata = []
+        x_time = []
+        y_paf = []
         for x in np.arange(0,10,0.5):
-            xdata.append(x)
-            ydata.append(np.exp(-x**2)+10*np.exp(-(x-7)**2))
-            self.on_running(xdata, ydata)
+            x_time.append(x)
+            y_paf.append(1.0/x)
+            self.on_running(x_time, y_paf)
             time.sleep(1)
-        return xdata, ydata
+        return x_time, y_paf
 
-d = DynamicUpdate()
+d = Plot()
 d()

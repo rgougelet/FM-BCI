@@ -18,9 +18,10 @@ streams = resolve_stream('name', 'SimulatedEEG')
 inlet = StreamInlet(streams[0])
 
 # populate the array in real time
-sampleRate = 512. # make sure this matches the sampleRate in SendData.py
+sampleRate = 1024. # make sure this matches the sampleRate in SendData.py
 numOfChannels = 8
-dataLengthSecs = 1
+dataLengthSecs = 5
+
 dataLengthSamples = dataLengthSecs*sampleRate
 voltageSamples = np.empty([numOfChannels,dataLengthSamples])
 sampleIndex = 0
@@ -32,7 +33,6 @@ orderFilter = 4
 
 # PAF(numOfChannels, sampleRate, bandLow, bandHigh, orderFilter)
 paf = processPAF.PAF(numOfChannels, sampleRate, bandLow, bandHigh, orderFilter)   
-
 
 try:
     while True:
