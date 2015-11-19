@@ -47,6 +47,9 @@ class Recorder:
     def record_raw(self, content):
         """ output raw matrix to the file without brackets or commas"""
         np.savetxt(self.file_name,content,fmt='%.5f') # %.5f specifies 5 decimal round
+        f = open(self.file_name)
+        if f.closed == False:
+            f.close()
         for clearline in range(1,10):   print('\n')
         print "\nData has been recorded and saved in:   " + str(self.file_name) 
         for clearline in range(1,10):   print('\n')   
