@@ -47,3 +47,16 @@ class Plot():
 
 d = Plot()
 d()
+
+
+
+        dataPerSampleRate = []
+
+
+         dataPerSampleRate.append(maxFreq)    
+
+            # do not run this cuz you are gonna get bombarded with plots
+            # self.plot(channelIndex, channelVoltage, freqs, amp, maxAmplitudeIndex)
+
+        # append dataPerSampleRate as column to the peak_alpha_freq array
+        self.peak_alpha_freq = np.c_[ self.peak_alpha_freq, dataPerSampleRate] 

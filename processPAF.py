@@ -17,106 +17,97 @@ import sys
 class PAF:
     """ PAF is used to process the peak alpha frequency giving voltage samples and sample rate"""
 
+    # peak_alpha_freqs = np.empty((8))
 
-    def __init__(self, numOfChannelss, sampleRate, bandLow, bandHigh, orderFilter):
-        self.sample_rate = sampleRate                             # sampling rate, default 256
-        self.num_of_channels = numOfChannelss
-        
-        self.peak_alpha_freq = np.zeros([numOfChannelss, 1])       # peak_alpha_freq is a (numOfChannelss X numOfSamples) matrix 
-        
-        # intialize the filter bands from 8 to 12 with filter order = 4
-        self.band_low = bandLow
-        self.band_high = bandHigh
-        self.order_filter = orderFilter                           
+    def __init__(self, numOfChannel, sampleRate, bandLow, bandHigh, orderFilter):
+        # intialize the filters
+        self.bandLow = bandLow
+        self.bandHigh = bandHigh
+        self.orderFilter = orderFilter
+        self.sampleRate = sampleRate
+        self.numOfChannel = numOfChannel
+        self.peak_alpha_freqs = np.zeros([numOfChannel, 1])       # peak_alpha_freq is a (numOfChannelss X numOfSamples) matrix 
 
         # Initialize the recorder 
         self.recorder = record.Recorder()
         self.recorder.record_new()
         self.recorder.write('Row = Channel \nColumn = true max freq per sample rate \n')
 
-
     def process_PAF(self, voltageSamples):
-        """ voltageSamples is a (numOfChannelss X sampleSize) matrix """
+        """ voltageSamples is a (numOfChannel X sampleSize) matrix """
 
-        # Number of samplepoints
-        numOfChannelss = voltageSamples.shape[0]              # number of channels
+        # Universal FFT parameters
+        numOfChannel = voltageSamples.shape[0]
 
-        if numOfChannelss != self.num_of_channels:
-            self.warning("The number of channels specified in object initialization differs from that in voltageSamples")
+        if numOfChannel != self.numOfChannel:
+            self.warning("numOfChannel specified in object creation does not match with that of the voltageSamples.")
 
-        dataLengthSamples = voltageSamples.shape[1]         # sample size
-        sampleSpacing = 1.0 / self.sample_rate        
-        dataLengthSecs = dataLengthSamples / self.sample_rate
-        desiredFreqResolution = 1
-        paddingMultiple = 1./desiredFreqResolution
-        fftLengthSamples = dataLengthSamples*int(paddingMultiple)
-        nyq = 0.5 * self.sample_rate
-        time = np.arange(0,dataLengthSecs,sampleSpacing)
-
-
-        # contains data from all eight channels per sample as a column
-        dataPerSampleRate = []
-
-        # going through each channel to plot fft result 
-        for channelIndex in range(0,numOfChannelss):
-
-            # detrend and window channel
-            channelVoltage = voltageSamples[channelIndex,:] - np.mean(voltageSamples[channelIndex,:])
-    		
-            channelVoltage = self.butter_bandpass_filter(channelVoltage, self.band_low, self.band_high, self.sample_rate, self.order_filter)      		
-    		
-            # window data
-            windowed = channelVoltage * signal.blackmanharris(dataLengthSamples)
-            #windowed = channelVoltage * signal.gaussian(dataLengthSamples, std=8,sym=False)
+        sampleSpacing = 1.0 / self.sampleRate        
+        desiredFreqResolution = 0.01
+        nyq = 0.5*self.sampleRate
+        fftLengthSamples = int(self.sampleRate/desiredFreqResolution)
+        freqs = scipy.fftpack.rfftfreq(fftLengthSamples,sampleSpacing) # retrieve frequency axis
+        
+        # Full data length FFT paramaters
+        dataLengthSamples = voltageSamples.shape[1]
+        dataLengthSecs = dataLengthSamples/self.sampleRate
+        dataTime = np.arange(0,dataLengthSecs,sampleSpacing)
+        
+        # Window data FFT parameters
+        winLengthSecs = 0.25 # predefine length of window.
+        winLengthSamples = winLengthSecs*self.sampleRate # length of window in samples
+        # winLengthSamples = 128 # length of window in samples
+        # winLengthSecs = winLengthSamples/float(self.sampleRate)
+        numOfWindows = int(dataLengthSamples/winLengthSamples) # determine number of windows
+        winTime = np.arange(0,winLengthSecs,sampleSpacing)
+        
+        # going through each channel to plot fft result
+        channelPeaks = np.empty([numOfChannel, numOfWindows]) # container for peak frequencies for each channel every second
+        
+        for channelIndex in range(0,numOfChannel):
+            channelVoltage = voltageSamples[channelIndex,:]
+            channelWinSpectra = np.empty([len(freqs), numOfWindows])
             
-            # compute fft
-            amp = abs(scipy.fftpack.rfft(channelVoltage,fftLengthSamples))
-            freqs = scipy.fftpack.rfftfreq(fftLengthSamples,sampleSpacing)
+            # filter data before parsing
+            channelVoltage = self.butter_bandpass_filter(channelVoltage, self.bandLow, self.bandHigh,self.sampleRate,self.orderFilter)
+            
+            # TODO: Xiang, Kalman filter
+            
+            for winIndex in range(0,numOfWindows):
+                # get next window of data, detrend
+                channelVoltageWin = channelVoltage[winIndex*winLengthSamples:(winIndex+1)*winLengthSamples] \
+                - np.mean(channelVoltage[winIndex*winLengthSamples:(winIndex+1)*winLengthSamples])
 
+                # window next window of data
+                #windowed = channelVoltage * signal.blackmanharris(winLengthSamples)
+                windowedWin = channelVoltageWin * signal.gaussian(winLengthSamples, std=8,sym=False)
 
-            # true_maxAmplitudeIndex and true_maxFreq causes divid by 0 exception sometimes so they are commented out
+                # compute fft
+                nyq = 0.5*self.sampleRate # maximum possible frequency to measure
+                amp = abs(scipy.fftpack.rfft(windowedWin,fftLengthSamples)) # determine amplitude spectrum by taking abs
 
-            # find peak frequency
-            maxAmplitudeIndex = np.argmax(amp)
-            # true_maxAmplitudeIndex = parabolic(np.log(amp), maxAmplitudeIndex)[0]
-            maxFreq = nyq * maxAmplitudeIndex / fftLengthSamples
-            # true_maxFreq = nyq * true_maxAmplitudeIndex / fftLengthSamples
-
-            # print('Channel '+str(channelIndex+1)+':     '+str(true_maxFreq)+'  '+str(maxFreq))
-            print('Channel '+str(channelIndex+1)+':     '+str(maxFreq))
-
-            # save sample to dataPerSampleRate
-            dataPerSampleRate.append(maxFreq)    
-
-            # do not run this cuz you are gonna get bombarded with plots
-            # self.plot(channelIndex, channelVoltage, freqs, amp, maxAmplitudeIndex)
-
-        # append dataPerSampleRate as column to the peak_alpha_freq array
-        self.peak_alpha_freq = np.c_[ self.peak_alpha_freq, dataPerSampleRate] 
-        # print self.peak_alpha_freq
-
-
-
-    def butter_bandpass_filter(self, my_paf , lowcut, highcut, fs, order=4):
-        b, a = self.butter_bandpass(lowcut, highcut, fs, order=order)
-        y = sp.signal.filtfilt(b, a, my_paf )
-        return y
-
-
-    # butter filter funtion       
-    def butter_bandpass(self, lowcut, highcut, fs, order=4):
-        """ A helper function of butter_bandpass_filter()
-            lowcut is the lower bound of the frequency that we want to isolate
-            hicut is the upper bound of the frequency that we want to isolate
-            fs is the sampling rate of our data
-        """
-        nyq = 0.5 * fs #nyquist frequency - see http://www.dspguide.com/ if you want more info
-        low = float(lowcut) / nyq
-        high = float(highcut) / nyq
-        b, a = sp.signal.butter(order, [low, high], btype='band')
-        return b, a
-
-
+                # find peak frequency
+                maxAmplitudeIndex = np.argmax(amp) # finds simple max amp peak
+                maxFreq = freqs[maxAmplitudeIndex] # retrieves frequency of peak
+                print('Channel '+str(channelIndex+1)+ ', Window '+str(winIndex+1)+':     '+str(maxFreq))
+                #true_maxAmplitudeIndex = parabolic(np.log(amp), maxAmplitudeIndex-1)[0] # finds parabolic interpolation
+                #true_maxFreq = nyq * true_maxAmplitudeIndex / fftLengthSamples # retrieves frequency of parabolic peak
+                #print('Channel '+str(channelIndex+1)+ ', Window '+str(winIndex+1)+':     '+str(true_maxFreq)+'  '+str(maxFreq))
+                channelPeaks[channelIndex,winIndex] = maxFreq # stores peak frequency for every window
+                channelWinSpectra[:,winIndex] = amp
+                
+                # do not run this cuz you are gonna get bombarded with plots
+                # self.plot(channelIndex, channelVoltage, freqs, amp, maxAmplitudeIndex)
+                # plt.show()
+                
+        medianChannelsPeaks = np.transpose(np.median(channelPeaks,1))
+        meanChannelsPeaks = np.transpose(np.mean(channelPeaks,1))
+        
+        self.peak_alpha_freq = meanChannelsPeaks
+        self.record_peak(self.peak_alpha_freq)
+        
+        # append outputColData as column to the peak_alpha_freq array
+        self.peak_alpha_freqs = np.c_[ self.peak_alpha_freqs, self.peak_alpha_freq] 
 
     def plot(self, channelIndex, channelVoltage, freqs, amp, maxAmplitudeIndex):
         """ plot the figures """
@@ -134,14 +125,27 @@ class PAF:
         ax2.set_ylabel('Amplitude')
         ax2.plot(freqs, np.mean(channelWinSpectra,1))
         # ax2.plot(freqs[maxAmplitudeIndex], amp[maxAmplitudeIndex], 'rD')   # highest frequency marker
-        ax2.grid()
-        plt.show()
 
+        
+    def butter_bandpass(self, lowcut, highcut, fs, order=4):
+        #lowcut is the lower bound of the frequency that we want to isolate
+        #hicut is the upper bound of the frequency that we want to isolate
+        #fs is the sampling rate of our data
+        nyq = 0.5 * fs #nyquist frequency - see http://www.dspguide.com/ if you want more info
+        low = float(lowcut) / nyq
+        high = float(highcut) / nyq
+        b, a = sp.signal.butter(order, [low, high], btype='band')
+        return b, a
 
-    def record_peak(self):
+    def butter_bandpass_filter(self, mydata, lowcut, highcut, fs, order=4):
+        b, a = self.butter_bandpass(lowcut, highcut, fs, order=order)
+        y = sp.signal.filtfilt(b, a, mydata)
+        return y
+
+    def record_peak(self, content):
         """ recording the peak at the end of the application all at once in pretty printing"""
         # self.recorder.record_raw(self.peak_alpha_freq)
-        self.recorder.write(self.peak_alpha_freq)
+        self.recorder.write(content)
 
 
     def warning (self, message):
@@ -150,7 +154,7 @@ class PAF:
 
     def output_to_file_before_exit(self):
         """  output alpha peak frequency to file on KeyBoardInterrupt """
-        self.record_peak()
+        self.recorder.record_raw(self.peak_alpha_freqs.transpose())
         # print 'Saved Data:'
         # print self.peak_alpha_freq
         for clearline in range(1,10):   print('\n')

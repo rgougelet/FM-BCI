@@ -19,11 +19,10 @@ inlet = StreamInlet(streams[0])
 
 # populate the array in real time
 sampleRate = 1024. # make sure this matches the sampleRate in SendData.py
-numOfChannels = 8
-dataLengthSecs = 5
-
+numOfChannel = 8
+dataLengthSecs = 1
 dataLengthSamples = dataLengthSecs*sampleRate
-voltageSamples = np.empty([numOfChannels,dataLengthSamples])
+voltageSamples = np.empty([numOfChannel,dataLengthSamples])
 sampleIndex = 0
 sample = vectorf()
 
@@ -32,9 +31,11 @@ bandHigh = 12                              # higher alpha band
 orderFilter = 4  
 
 # PAF(numOfChannels, sampleRate, bandLow, bandHigh, orderFilter)
-paf = processPAF.PAF(numOfChannels, sampleRate, bandLow, bandHigh, orderFilter)   
+paf = processPAF.PAF(numOfChannel, sampleRate, bandLow, bandHigh, orderFilter)   
+
 
 try:
+    print("Collecting data in "+str(dataLengthSecs)+" second chunks.")
     while True:
         # get a new sample (you can also omit the timestamp part if you're not
         # interested in it)

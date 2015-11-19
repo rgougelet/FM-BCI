@@ -3,16 +3,24 @@ import errno
 import time
 import shutil
 import numpy as np
+import platform
+
+# Example Usage: 
+# self.recorder = record.Recorder()  # create the recorder 
+# self.recorder.record_new()         # create new recording txt
+# self.recorder.write('first line')   # to the txt file
 
 class Recorder:
 
-    target_file = None     # the target_file file to write to
-
-    file_name = ""         # the target file name
-
     def __init__(self):
-        self.create_directory("./recordings")
-
+        if platform.system() == "Darwin":
+            self.create_directory("./recordings")
+            self.saved_directory = "./recordings/"
+            self.file_name = self.saved_directory + time.strftime("%Y-%m-%d_%H-%M-%S",)+".txt"
+        elif platform.system() == "Windows":
+            self.create_directory(".\\recordings")
+            self.saved_directory = ".\\recordings\\"
+            self.file_name = self.saved_directory + time.strftime("%Y-%m-%d_%H-%M-%S",)+".txt"
 
     def create_directory(self, path):
         """ create directories for eeg recordings"""
@@ -21,30 +29,23 @@ class Recorder:
         except OSError as exception:
             if exception.errno != errno.EEXIST:
                 raise
-       
 
     def write(self, content):
-        if self.target_file != None:
+        with open(self.file_name, 'a') as self.target_file:
             self.target_file.write('%s' % content)
             self.target_file.write("\n")
-
 
     def delete_recordings(self):
         shutil.rmtree('./recordings')
 
-
     #providing name for the file to be created
     def record_new(self):
-        # filename = raw_input("Please enter a file name for this recording: ")
-        self.file_name = time.strftime("%H:%M:%S-%d-%m-%Y")
-        ## a will append, w will over-write
-        self.target_file = open (os.path.join("./recordings", self.file_name + ".txt"), 'a') 
-        self.target_file.write("EEG recorded on "+ time.strftime("%d/%m/%Y")+ " at "+time.strftime("%H:%M:%S")+"\n\n\n")
-        
-
+        with open(self.file_name, 'a') as self.target_file: # a will append, w will over-write
+            self.target_file.write("EEG recorded on "+ time.strftime("%d/%m/%Y")+ " at "+time.strftime("%H:%M:%S")+"\n\n\n")
 
     # used to create a raw file quickly
     def record_raw(self, content):
+        """ output raw matrix to the file without brackets or commas"""
         filename = time.strftime("./recordings/%H:%M:%S-%d-%m-%Y")
         # %.5f specifies 5 decimal round
         np.savetxt(filename,content,fmt='%.5f')    
