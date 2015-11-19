@@ -11,7 +11,6 @@ for clearline in range(1,100):
 sampleRate = 1024.0
 info = StreamInfo('SimulatedEEG', 'EEG', 8, sampleRate, 'float32', 'myuid34234')
 
-<<<<<<< HEAD
 # append some meta-data
 info.desc().append_child_value("manufacturer", "BrainProducts")
 channels = info.desc().append_child("channels")
@@ -20,10 +19,8 @@ for c in ["C3", "C4", "Cz", "FPz", "POz", "CPz", "O1", "O2"]:
         .append_child_value("name", c)\
         .append_child_value("unit", "microvolts")\
         .append_child_value("type", "EEG")
-
-=======
+        
 # channel weighting
->>>>>>> signal_processing
 numOfChannel = 8
 channelWeights = np.linspace(1./numOfChannel,1,numOfChannel) 
 #np.random.shuffle(channelWeights)
