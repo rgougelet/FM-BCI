@@ -22,7 +22,6 @@ class Recorder:
             self.saved_directory = "./recordings/"
             self.file_name = self.saved_directory + time.strftime("%Y-%m-%d_%H-%M-%S",)+".txt"
 
-
     def create_directory(self, path):
         """ create directories for eeg recordings"""
         try:
@@ -47,12 +46,10 @@ class Recorder:
     # used to create a raw file quickly
     def record_raw(self, content):
         """ output raw matrix to the file without brackets or commas"""
-        # %.5f specifies 5 decimal round
-        np.savetxt(self.file_name,content,fmt='%.5f') 
+        np.savetxt(self.file_name,content,fmt='%.5f') # %.5f specifies 5 decimal round
         for clearline in range(1,10):   print('\n')
         print "\nData has been recorded and saved in:   " + str(self.file_name) 
         for clearline in range(1,10):   print('\n')   
-
 
     # def write_test(self):
     #     # providing the content for the file

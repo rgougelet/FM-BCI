@@ -32,9 +32,7 @@ bandLow = 8                                # lower alpha band
 bandHigh = 12                              # higher alpha band
 orderFilter = 4  
 
-# PAF(numOfChannels, sampleRate, bandLow, bandHigh, orderFilter)
 paf = processPAF.PAF(numOfChannel, sampleRate, bandLow, bandHigh, orderFilter)   
-
 
 try:
     print("Collecting data in "+str(dataLengthSecs)+" second chunks.")

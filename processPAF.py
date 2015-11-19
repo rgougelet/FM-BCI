@@ -154,9 +154,10 @@ class PAF:
 
     def output_to_file_before_exit(self):
         """  output alpha peak frequency to file on KeyBoardInterrupt """
+        print 'Saved Data:'
+        print self.peak_alpha_freq
         self.recorder.record_raw(self.peak_alpha_freqs.transpose())
-        # print 'Saved Data:'
-        # print self.peak_alpha_freq
+        
 
 
 
