@@ -1,4 +1,5 @@
 import pylab
+import platform
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.fftpack
@@ -9,6 +10,7 @@ import sys
 sys.path.insert(0, './pylsl')
 from pylsl import StreamInlet, resolve_stream, vectorf
 import processPAF
+
 
 # first resolve an EEG stream on the lab network
 print("looking for an EEG stream...")
@@ -49,9 +51,23 @@ try:
             paf.process_PAF(voltageSamples)
             sampleIndex = 0
 
+        # equivalent of Keyboard inturrpt on Windows
+        if platform.system() == "Windows":
+            import msvcrt
+            if msvcrt.kbhit():
+                if ord(msvcrt.getch()) == 'q':
+                    # Write to file before exit
+                    paf.output_to_file_before_exit()
+                    exit()
+
+
+
 except KeyboardInterrupt:
     # Write to file before exit
     paf.output_to_file_before_exit()
     raise
+
+
+
 
 
