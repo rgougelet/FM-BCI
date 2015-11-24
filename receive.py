@@ -12,57 +12,48 @@ from pylsl import StreamInlet, resolve_stream, vectorf
 import processing as p
 import record
 
-
-def output_to_file_before_exit():
-    """  output alpha peak frequency to file on KeyBoardInterrupt """
-    print 'Saved Data:'
-    print peak_alpha_freqs
-    recorder.record_raw(peak_alpha_freqs.transpose())
-
-
-# first resolve an EEG stream on the lab network
+# initialize data stream
 print("looking for an EEG stream...")
 streams = resolve_stream('name', 'SimulatedEEG')
-
-# create a new inlet to read from the stream
 inlet = StreamInlet(streams[0])
+
+# Extract stream info
+inf = inlet.info()
+print("The stream's XML meta-data is: ")
+#print(inf.as_xml())
+sampleRate = inf.desc().child_value("nominal_srate") # make sure this matches the sampleRate in SendData.py
+print sampleRate
+numOfChannel = inf.desc().child_value("channel_count")
+sample = vectorf()
 
 # Initialize the recorder 
 recorder = record.Recorder()
 
-# populate the array in real time
-sampleRate = 1024. # make sure this matches the sampleRate in SendData.py
-numOfChannel = 8
-dataLengthSecs = 1
-dataLengthSamples = dataLengthSecs * sampleRate
-voltageSamples = np.empty([numOfChannel,dataLengthSamples])
-sampleIndex = 0
-sample = vectorf()
-
+# Processing parameters
+chunkLengthSecs = 1
+chunkLengthSamples = int(chunkLengthSecs * sampleRate)
 bandLow = 8                                # lower alpha band 
 bandHigh = 12                              # higher alpha band
-orderFilter = 4  
+orderFilter = 4
+dataChunkSamples = np.empty([numOfChannel,chunkLengthSamples])
 
-# peak_alpha_freq is a (numOfChannelss X numOfSamples) matrix , add 1 column of zero padding
-peak_alpha_freqs = np.zeros([numOfChannel, 0])       
-
-# Online
 try:
-    print("Collecting data in "+str(dataLengthSecs)+" second chunks.")
+    print("Collecting data in "+str(chunkLengthSecs)+" second chunks.")
+    sampleIndex = 0
+    peak_alpha_freqs = np.zeros([numOfChannel, 0]) # grows with every chunk and stores peaks for each channel
     while True:
-        # get a new sample (you can also omit the timestamp part if you're not
-        # interested in it)
-        sample, timestamp = inlet.pull_sample()
-        
+    
         # populating the samples
+        sample, timestamp = inlet.pull_sample()
         voltageSamples[:, sampleIndex] = sample
         sampleIndex += 1
 
+        # process data chunk
         if sampleIndex == dataLengthSamples:
-            peak_alpha_freq = p.spectral_averaging(voltageSamples, sampleRate, numOfChannel)
-            # append outputColData as column to the peak_alpha_freq array
-            peak_alpha_freqs = np.c_[peak_alpha_freqs, peak_alpha_freq] 
-            sampleIndex = 0
+            voltageSamples = p.butter_bandpass_filter(voltageSamples,bandLow,bandHigh,orderFilter)
+            peak_alpha_freq = p.spectral_averaging(voltageSamples, sampleRate)
+            peak_alpha_freqs = np.c_[peak_alpha_freqs, peak_alpha_freq] # append to storage array
+            sampleIndex = 0 # restart new chunk
 
         # equivalent of Keyboard inturrpt on Windows
         if platform.system() == "Windows":
@@ -73,10 +64,10 @@ try:
                     output_to_file_before_exit()
                     exit()
 
-
-
 except KeyboardInterrupt:
     # Write to file before exit
-    output_to_file_before_exit()
+    print 'Saved Data:'
+    print peak_alpha_freqs
+    recorder.record_raw(peak_alpha_freqs.transpose())
     raise
 

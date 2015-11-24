@@ -10,49 +10,22 @@ import math
 from scipy.signal import butter, lfilter  
 import matplotlib.pyplot as plt
 
-# returns peak alpha frequencys of voltage over a period of time
-def spectral_averaging_batch(dataLengthSamples, sampleRate, numOfChannel, bandLow = 8, bandHigh = 12, orderFilter = 4):
-    totalNumOfSamples = dataLengthSamples.shape[1]
-    dataLengthSecs = (int)(totalNumOfSamples / sampleRate)  
-    # peak_alpha_freq is a (numOfChannelss X numOfSamples) matrix 
-    peak_alpha_freqs = np.zeros([numOfChannel, 0])       
-
-    for timeIndex in range(0,dataLengthSecs):
-        voltageSamples = dataLengthSamples[:, (sampleRate*timeIndex):(sampleRate*(timeIndex+1)):1]
-
-        peak_alpha_freq = spectral_averaging(voltageSamples, sampleRate, numOfChannel)
-        # append outputColData as column to the peak_alpha_freq array
-        peak_alpha_freqs = np.c_[peak_alpha_freqs, peak_alpha_freq] 
-        # print peak_alpha_freqs
-
-    return peak_alpha_freqs
-
-
 # returns peak alpha frequency of voltage samples in one second
-def spectral_averaging(voltageSamples, sampleRate, numOfChannel, bandLow = 8, bandHigh = 12, orderFilter = 4):
+def spectral_averaging(voltageSamples, sampleRate, winLengthSamples, desiredFreqResolution):
     """ voltageSamples is a (numOfChannel X sampleSize) matrix """
 
     # Universal FFT parameters
     numOfChannel = voltageSamples.shape[0]
-
-    if numOfChannel != numOfChannel:
-        print "Warning: numOfChannel specified in object creation does not match with that of the voltageSamples."
-        exit()
-
+    dataLengthSamples = dataLengthSamples.shape[1]
+    dataLengthSecs = (int)(totalNumOfSamples / sampleRate) 
     sampleSpacing = 1.0 / sampleRate        
-    desiredFreqResolution = 0.01
     nyq = 0.5 * sampleRate
     fftLengthSamples = int(sampleRate/desiredFreqResolution)
     freqs = scipy.fftpack.rfftfreq(fftLengthSamples,sampleSpacing) # retrieve frequency axis
-    
-    # Full data length FFT paramaters
-    dataLengthSamples = voltageSamples.shape[1]
-    dataLengthSecs = dataLengthSamples/sampleRate
     dataTime = np.arange(0,dataLengthSecs,sampleSpacing)
     
     # Window data FFT parameters
-    winLengthSecs = 0.25 # predefine length of window.
-    winLengthSamples = winLengthSecs * sampleRate # length of window in samples
+    winLengthSecs = winLengthSamples/sampleRate
     numOfWindows = int(dataLengthSamples/winLengthSamples) # determine number of windows
     winTime = np.arange(0,winLengthSecs,sampleSpacing)
     
@@ -62,12 +35,6 @@ def spectral_averaging(voltageSamples, sampleRate, numOfChannel, bandLow = 8, ba
     for channelIndex in range(0,numOfChannel):
         channelVoltage = voltageSamples[channelIndex,:]
         channelWinSpectra = np.empty([len(freqs), numOfWindows])
-        
-        # filter data before parsing
-        channelVoltage = butter_bandpass_filter(channelVoltage, bandLow, bandHigh, sampleRate, orderFilter)
-        
-        # TODO: Xiang, Kalman filter
-
         for winIndex in range(0,numOfWindows):
             # get next window of data, detrend
             channelVoltageWin = channelVoltage[winIndex*winLengthSamples:(winIndex+1) * winLengthSamples] \
@@ -91,10 +58,8 @@ def spectral_averaging(voltageSamples, sampleRate, numOfChannel, bandLow = 8, ba
             channelPeaks[channelIndex,winIndex] = maxFreq # stores peak frequency for every window
             channelWinSpectra[:,winIndex] = amp
 
-
             # plot(channelIndex, channelVoltage, freqs, amp, maxAmplitudeIndex, channelWinSpectra)
             # plt.show()
-
 
     # peak alpha frequency from averaging windows, either mean or median
     medianChannelsPeaks = np.transpose(np.median(channelPeaks,1))
@@ -102,47 +67,26 @@ def spectral_averaging(voltageSamples, sampleRate, numOfChannel, bandLow = 8, ba
         
     return meanChannelsPeaks
 
-
-def butter_bandpass(lowcut, highcut, fs, order=4):
-    #lowcut is the lower bound of the frequency that we want to isolate
-    #hicut is the upper bound of the frequency that we want to isolate
-    #fs is the sampling rate of our data
+def butter_bandpass_filter(mydata, lowcut, highcut, fs, order=4):
     nyq = 0.5 * fs #nyquist frequency - see http://www.dspguide.com/ if you want more info
     low = float(lowcut) / nyq
     high = float(highcut) / nyq
     b, a = sp.signal.butter(order, [low, high], btype='band')
-    return b, a
-
-def butter_bandpass_filter(mydata, lowcut, highcut, fs, order=4):
-    b, a = butter_bandpass(lowcut, highcut, fs, order=order)
     y = sp.signal.filtfilt(b, a, mydata)
     return y
 
 
-
-
-
-
-
-
-
-
-# used to plot spectral_averaging
-
-def plot(channelIndex, channelVoltage, freqs, amp, maxAmplitudeIndex, channelWinSpectra):
-    """ plot the figures """
+def plot_chan_time(t,channelVoltage):
     fig=plt.figure(figsize=(12, 9))
-    fig.suptitle('Channel '+str(channelIndex+1), fontsize=20)
-
-    ax1=fig.add_subplot(211)
     ax1.set_xlabel('Time [s]')
     ax1.set_ylabel('Voltage [V]')
-    ax1.plot(channelVoltage)
+    ax1.plot(t,channelVoltage)
     ax1.grid()
-
-    ax2=fig.add_subplot(212)
+    
+def plot_chan_freq(freqs, chanAmp):
+    fig=plt.figure(figsize=(12, 9))
     ax2.set_xlabel('Frequency [Hz]')
     ax2.set_ylabel('Amplitude')
-    ax2.plot(freqs, np.mean(channelWinSpectra,1))
-    # ax2.plot(freqs[maxAmplitudeIndex], amp[maxAmplitudeIndex], 'rD')   # highest frequency marker
+    ax2.plot(freqs, chanAmp)
+
 
