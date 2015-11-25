@@ -3,20 +3,59 @@ import numpy as np
 import scipy as sp
 import scipy.fftpack
 from scipy import signal
-from parabolic import parabolic
-import random
-import time
-import math
 from scipy.signal import butter, lfilter  
 import matplotlib.pyplot as plt
 
-# returns peak alpha frequency of voltage samples in one second
-def chan_spect_median(voltageSamples, sampleRate, winLengthSamples, desiredFreqResolution):
+def chan_spect_median(voltageSamples, sampleRate, desiredFreqResolution, winLengthSamples, overlapSamples):
+    sampleRate = float(sampleRate)
+    
+    # Universal FFT parameters
+    dataLengthSamples = len(voltageSamples)
+    dataLengthSecs = dataLengthSamples / sampleRate
+    sampleSpacing = 1.0/sampleRate        
+    nyq = 0.5 * sampleRate
+    fftLengthSamples = int(sampleRate/desiredFreqResolution)
+    freqs = np.fft.rfftfreq(fftLengthSamples,sampleSpacing)
+    stepSize = overlapSamples
+    winSpectra = np.empty([len(freqs),0])
+    stepIndex = 0
+    winStart = 0
+
+    while winStart + winLengthSamples < dataLengthSamples:
+        # get next window
+        winStart = stepIndex*stepSize
+        winStop = winStart + winLengthSamples
+        voltageSamplesWin = voltageSamples[winStart:winStop]
+
+        # detrend
+        voltageSamplesWin = signal.detrend(voltageSamplesWin, axis=-1, type='linear')
+        
+        # window window
+        windowedWin = voltageSamplesWin * signal.hanning(winLengthSamples)
+
+        # compute fft
+        amp = abs(np.fft.rfft(windowedWin,fftLengthSamples))
+        winSpectra = np.c_[winSpectra,amp]
+        stepIndex+=1 
+
+    medianSpectrum = np.median(winSpectra,1)
+        
+    return medianSpectrum
+    
+def chan_welch(voltageSamples, sampleRate, desiredFreqResolution, winLengthSamples, overlapSamples):
+    dataLengthSamples = len(voltageSamples)
+    dataLengthSecs = dataLengthSamples / sampleRate
+    sampleSpacing = 1.0/sampleRate        
+    fftLengthSamples = int(sampleRate/desiredFreqResolution)
+    f,pspec = sp.signal.welch(voltageSamples, fs=sampleRate, window='hanning', nperseg=fftLengthSamples, noverlap=overlapSamples, nfft=fftLengthSamples, detrend='linear', return_onesided=True, scaling='density')
+    return pspec
+    
+def mat_spect_median(voltageSamples, sampleRate, desiredFreqResolution, windowLengthSamples):
     """ voltageSamples is a (numOfChannel X dataLengthSamples) matrix """
 
     # Universal FFT parameters
     numOfChannel = voltageSamples.shape[0]
-    dataLengthSamples = dataLengthSamples.shape[1]
+    dataLengthSamples = voltageSamples.shape[1]
     dataLengthSecs = (int)(totalNumOfSamples / sampleRate) 
     sampleSpacing = 1.0 / sampleRate        
     nyq = 0.5 * sampleRate
@@ -52,15 +91,27 @@ def chan_spect_median(voltageSamples, sampleRate, winLengthSamples, desiredFreqR
         medianSpectrum = np.transpose(np.median(channelWinSpectra,1))
         
     return medianSpectrum
+
+def mat_welch():
+    return
     
-def chan_peak_freq(spectrum):
-    maxAmplitudeIndex = np.argmax(spectrum)
+def chan_peak_freq(chanSpec, desiredFreqResolution):
+    freqs = np.empty(len(chanSpec))
+    for i in range(0,len(chanSpec)):
+        freqs[i] = i*desiredFreqResolution
+    maxAmplitudeIndex = np.argmax(chanSpec)
     maxFreq = freqs[maxAmplitudeIndex]
-    
-    #maxAmplitudeIndex = parabolic(np.log(amp), np.argmax(amp)-1)[0]
-    #maxFreq = nyq * maxAmplitudeIndex / fftLengthSamples
-    
     return maxFreq
+
+def chan_peak_freq_parab(chanSpec, desiredFreqResolution):
+    from parabolic import parabolic
+    freqs = np.empty(len(chanSpec))
+    for i in range(0,len(chanSpec)):
+        freqs[i] = i*desiredFreqResolution
+    sampleRate = (freqs[-1]*2)
+    fftLengthSamples = sampleRate/desiredFreqResolution
+    maxAmplitudeIndex = parabolic(np.log(chanSpec), np.argmax(chanSpec)-1)[0]
+    maxFreq =  freqs[-1] * maxAmplitudeIndex / fftLengthSamples
 
 def butter_bandpass_filter(mydata, lowcut, highcut, fs, order=4):
     nyq = 0.5 * fs
@@ -76,14 +127,18 @@ def chan_plot_time(t,channelVoltage):
     plt.xlabel('Time [s]')
     plt.ylabel('Voltage [V]')
     plt.grid()
-    plt.show()
+    plt.draw()
     
-def chan_plot_freq(freqs, chanAmp):
+def chan_plot_freq(chanSpec, desiredFreqResolution):
+    freqs = np.empty(len(chanSpec))
+    for i in range(0,len(chanSpec)):
+        freqs[i] = i*desiredFreqResolution
     fig=plt.figure(figsize=(12, 9))
-    plt.plot(freqs,chanAmp)
+    plt.plot(freqs,chanSpec)
     plt.xlabel('Frequency [Hz]')
     plt.ylabel('Amplitude')
     plt.grid()
-    plt.show()
+    plt.draw()
+
 
 
