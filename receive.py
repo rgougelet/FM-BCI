@@ -1,11 +1,5 @@
-import pylab
 import platform
 import numpy as np
-import matplotlib.pyplot as plt
-import scipy.fftpack
-import random
-import time
-import math
 import sys
 sys.path.insert(0, './pylsl')
 from pylsl import StreamInlet, resolve_stream, vectorf
@@ -55,13 +49,14 @@ try:
         if sampleIndex == dataLengthSamples:
             voltageSamples = p.butter_bandpass_filter(voltageSamples,bandLow,bandHigh,sampleRate,orderFilter)
             peak_alpha_freq = np.empty([numOfChannel,])
-            print np.shape(peak_alpha_freq)
             for channelIndex in range(numOfChannel):
                 medianSpectrum = p.chan_spect_median(voltageSamples[channelIndex,:], sampleRate, desiredFreqResolution, winLengthSamples, overlapSamples)
                 medianPeak = p.chan_peak_freq(medianSpectrum, desiredFreqResolution)
 
                 peak_alpha_freq[channelIndex] = medianPeak
+                
                 peak_alpha_freqs = np.c_[peak_alpha_freqs, peak_alpha_freq] # append to storage array
+            print peak_alpha_freq
             sampleIndex = 0 # restart new chunk
 
         # equivalent of Keyboard inturrpt on Windows

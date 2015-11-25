@@ -24,7 +24,6 @@ voltageSamples[channelIndex,:] = o.fm(dataLengthSamples, sampleRate, alphaCenter
 
 # create outlet for output
 info = StreamInfo('SimulatedEEG', 'EEG', numOfChannel, sampleRate, 'float32', 'myuid34234')
-info.desc().append_child_value("manufacturer", "SCCN")
 outlet = StreamOutlet(info)
 print("\n \nSending data...")
 
