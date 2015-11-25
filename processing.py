@@ -11,8 +11,8 @@ from scipy.signal import butter, lfilter
 import matplotlib.pyplot as plt
 
 # returns peak alpha frequency of voltage samples in one second
-def spectral_averaging(voltageSamples, sampleRate, winLengthSamples, desiredFreqResolution):
-    """ voltageSamples is a (numOfChannel X sampleSize) matrix """
+def chan_spect_median(voltageSamples, sampleRate, winLengthSamples, desiredFreqResolution):
+    """ voltageSamples is a (numOfChannel X dataLengthSamples) matrix """
 
     # Universal FFT parameters
     numOfChannel = voltageSamples.shape[0]
@@ -37,56 +37,53 @@ def spectral_averaging(voltageSamples, sampleRate, winLengthSamples, desiredFreq
         channelWinSpectra = np.empty([len(freqs), numOfWindows])
         for winIndex in range(0,numOfWindows):
             # get next window of data, detrend
-            channelVoltageWin = channelVoltage[winIndex*winLengthSamples:(winIndex+1) * winLengthSamples] \
-            - np.mean(channelVoltage[winIndex*winLengthSamples:(winIndex+1)*winLengthSamples])
-
-            # window next window of data
-            #windowed = channelVoltage * signal.blackmanharris(winLengthSamples)
+            channelVoltageWin = channelVoltage[winIndex*winLengthSamples:(winIndex+1)*winLengthSamples]
+            channelVoltageWin = channelVoltageWin - np.mean(channelVoltageWin)
+            
+            # window window
+            #windowedWin = channelVoltage * signal.blackmanharris(winLengthSamples)
             windowedWin = channelVoltageWin * signal.gaussian(winLengthSamples, std=8,sym=False)
 
             # compute fft
             nyq = 0.5 * sampleRate # maximum possible frequency to measure
             amp = abs(scipy.fftpack.rfft(windowedWin,fftLengthSamples)) # determine amplitude spectrum by taking abs
-
-            # find peak frequency
-            maxAmplitudeIndex = np.argmax(amp) # finds simple max amp peak
-            maxFreq = freqs[maxAmplitudeIndex] # retrieves frequency of peak
-            # print('Channel '+str(channelIndex+1)+ ', Window '+str(winIndex+1)+':     '+str(maxFreq))
-            #true_maxAmplitudeIndex = parabolic(np.log(amp), maxAmplitudeIndex-1)[0] # finds parabolic interpolation
-            #true_maxFreq = nyq * true_maxAmplitudeIndex / fftLengthSamples # retrieves frequency of parabolic peak
-            #print('Channel '+str(channelIndex+1)+ ', Window '+str(winIndex+1)+':     '+str(true_maxFreq)+'  '+str(maxFreq))
-            channelPeaks[channelIndex,winIndex] = maxFreq # stores peak frequency for every window
             channelWinSpectra[:,winIndex] = amp
-
-            # plot(channelIndex, channelVoltage, freqs, amp, maxAmplitudeIndex, channelWinSpectra)
-            # plt.show()
-
-    # peak alpha frequency from averaging windows, either mean or median
-    medianChannelsPeaks = np.transpose(np.median(channelPeaks,1))
-    meanChannelsPeaks = np.transpose(np.mean(channelPeaks,1))
+            
+        medianSpectrum = np.transpose(np.median(channelWinSpectra,1))
         
-    return meanChannelsPeaks
+    return medianSpectrum
+    
+def chan_peak_freq(spectrum):
+    maxAmplitudeIndex = np.argmax(spectrum)
+    maxFreq = freqs[maxAmplitudeIndex]
+    
+    #maxAmplitudeIndex = parabolic(np.log(amp), np.argmax(amp)-1)[0]
+    #maxFreq = nyq * maxAmplitudeIndex / fftLengthSamples
+    
+    return maxFreq
 
 def butter_bandpass_filter(mydata, lowcut, highcut, fs, order=4):
-    nyq = 0.5 * fs #nyquist frequency - see http://www.dspguide.com/ if you want more info
+    nyq = 0.5 * fs
     low = float(lowcut) / nyq
     high = float(highcut) / nyq
     b, a = sp.signal.butter(order, [low, high], btype='band')
     y = sp.signal.filtfilt(b, a, mydata)
     return y
 
-
-def plot_chan_time(t,channelVoltage):
+def chan_plot_time(t,channelVoltage):
     fig=plt.figure(figsize=(12, 9))
-    ax1.set_xlabel('Time [s]')
-    ax1.set_ylabel('Voltage [V]')
-    ax1.plot(t,channelVoltage)
-    ax1.grid()
+    plt.plot(t,channelVoltage)
+    plt.xlabel('Time [s]')
+    plt.ylabel('Voltage [V]')
+    plt.grid()
+    plt.show()
     
-def plot_chan_freq(freqs, chanAmp):
+def chan_plot_freq(freqs, chanAmp):
     fig=plt.figure(figsize=(12, 9))
-    ax2.set_xlabel('Frequency [Hz]')
-    ax2.set_ylabel('Amplitude')
-    ax2.plot(freqs, chanAmp)
+    plt.plot(freqs,chanAmp)
+    plt.xlabel('Frequency [Hz]')
+    plt.ylabel('Amplitude')
+    plt.grid()
+    plt.show()
 
 

@@ -40,7 +40,7 @@ dataChunkSamples = np.empty([numOfChannel,chunkLengthSamples])
 try:
     print("Collecting data in "+str(chunkLengthSecs)+" second chunks.")
     sampleIndex = 0
-    peak_alpha_freqs = np.zeros([numOfChannel, 0]) # grows with every chunk and stores peaks for each channel
+    peak_alpha_freqs = np.zeros([numOfChannel,0]) # grows with every chunk and stores peaks for each channel
     while True:
     
         # populating the samples
