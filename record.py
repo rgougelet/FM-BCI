@@ -3,12 +3,24 @@ import errno
 import time
 import shutil
 import numpy as np
+import platform
 
-class Record:
+# Example Usage: 
+# recorder = record.Recorder()  # create the recorder 
+# recorder.record_new()         # create new recording txt
+# recorder.write('first line')   # to the txt file
+
+class Recorder:
 
     def __init__(self):
-        self.create_directory(".\\recordings")
-        self.file_name = ".\\recordings\\"+time.strftime("%Y-%m-%d_%H-%M-%S",)+".txt"
+        if platform.system() == "Windows":
+            self.create_directory(".\\recordings")
+            self.saved_directory = ".\\recordings\\"
+            self.file_name = self.saved_directory + time.strftime("%Y-%m-%d_%H-%M-%S",)+".txt"
+        else:
+            self.create_directory("./recordings")
+            self.saved_directory = "./recordings/"
+            self.file_name = self.saved_directory + time.strftime("%Y-%m-%d_%H-%M-%S",)+".txt"
 
     def create_directory(self, path):
         """ create directories for eeg recordings"""
@@ -33,10 +45,14 @@ class Record:
 
     # used to create a raw file quickly
     def record_raw(self, content):
-        filename = time.strftime("./recordings/%H:%M:%S-%d-%m-%Y")
-        # %.5f specifies 5 decimal round
-        np.savetxt(filename,content,fmt='%.5f')    
-        return filename
+        """ output raw matrix to the file without brackets or commas"""
+        np.savetxt(self.file_name,content,fmt='%.5f') # %.5f specifies 5 decimal round
+        f = open(self.file_name)
+        if f.close == False:
+            f.close()
+        for clearline in range(1,10):   print('\n')
+        print "\nData has been recorded and saved in:   " + str(self.file_name) 
+        for clearline in range(1,10):   print('\n')   
 
     # def write_test(self):
     #     # providing the content for the file
