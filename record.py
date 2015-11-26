@@ -6,9 +6,9 @@ import numpy as np
 import platform
 
 # Example Usage: 
-# self.recorder = record.Recorder()  # create the recorder 
-# self.recorder.record_new()         # create new recording txt
-# self.recorder.write('first line')   # to the txt file
+# recorder = record.Recorder()  # create the recorder 
+# recorder.record_new()         # create new recording txt
+# recorder.write('first line')   # to the txt file
 
 class Recorder:
 
