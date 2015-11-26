@@ -42,23 +42,42 @@ while True:
 
     # populating the samples
     sample, timestamp = inlet.pull_sample()
-    voltageSamples[:, sampleIndex] = sample
+    voltageSamples[:, sampleIndex] = sample   # number of channels by dataLengthSamples matrix
     sampleIndex += 1
 
     # process data chunk
     if sampleIndex == dataLengthSamples:
         voltageSamples = p.butter_bandpass_filter(voltageSamples,bandLow,bandHigh,sampleRate,orderFilter)
-        peak_alpha_freq = np.empty([numOfChannel,])
-        for channelIndex in range(numOfChannel):
-            medianSpectrum = p.chan_spect_median(voltageSamples[channelIndex,:], sampleRate, desiredFreqResolution, winLengthSamples, overlapSamples)
-            medianPeak = p.chan_peak_freq(medianSpectrum, desiredFreqResolution)
+        medianSpectrumMat = p.spect_median(voltageSamples, sampleRate, desiredFreqResolution, winLengthSamples, overlapSamples)
+        peak_alpha_freq = p.peak_freq(medianSpectrumMat, desiredFreqResolution)
 
-            peak_alpha_freq[channelIndex] = medianPeak
+
+        # voltageSamples = p.butter_bandpass_filter(voltageSamples,bandLow,bandHigh,sampleRate,orderFilter)
+        # peak_alpha_freq = np.empty([numOfChannel,])
+        # for channelIndex in range(numOfChannel):
+        #     medianSpectrum = p.chan_spect_median(voltageSamples[channelIndex,:], sampleRate, desiredFreqResolution, winLengthSamples, overlapSamples)
+
+        #     print "medianSpectrum: " + str(medianSpectrum)
+
+        #     medianPeak = p.chan_peak_freq(medianSpectrum, desiredFreqResolution)
+        #     print "MeanPeak: " + str(medianPeak)
+
+        #     peak_alpha_freq[channelIndex] = medianPeak
+        #     print "peak_alpha_freq: " + str(peak_alpha_freq)
             
-            peak_alpha_freqs = np.c_[peak_alpha_freqs, peak_alpha_freq] # append to storage array
+        #     peak_alpha_freqs = np.c_[peak_alpha_freqs, peak_alpha_freq] # append to storage array
+
+
+
+        peak_alpha_freqs = np.c_[peak_alpha_freqs, peak_alpha_freq] # append to storage array
+
+        # peak_alpha_freq = p.spect_median(voltageSamples, sampleRate, desiredFreqResolution, winLengthSamples)
+
         print peak_alpha_freq
         recorder.write(peak_alpha_freq)
         sampleIndex = 0 # restart new chunk
+
+
 
 
 
