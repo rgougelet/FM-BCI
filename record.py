@@ -12,16 +12,22 @@ import platform
 
 class Recorder:
 
-    def __init__(self):
+    def __init__(self, nameExtra = "", overrideName = False):
         if platform.system() == "Windows":
             self.create_directory(".\\recordings")
             self.saved_directory = ".\\recordings\\"
-            self.file_name = self.saved_directory + time.strftime("%Y-%m-%d_%H-%M-%S",)+".txt"
+            if not overrideName:
+                self.file_name = self.saved_directory + time.strftime("%Y-%m-%d_%H-%M-%S",)+nameExtra+".txt"
+            else:
+                self.file_name = self.saved_directory+nameExtra+".txt"
+
         else:
             self.create_directory("./recordings")
             self.saved_directory = "./recordings/"
-            self.file_name = self.saved_directory + time.strftime("%Y-%m-%d_%H-%M-%S",)+".txt"
-
+            if not overrideName:
+                self.file_name = self.saved_directory + time.strftime("%Y-%m-%d_%H-%M-%S",)+nameExtra+".txt"
+            else:
+                self.file_name = self.saved_directory+nameExtra+".txt"
     def create_directory(self, path):
         """ create directories for eeg recordings"""
         try:
