@@ -23,6 +23,7 @@ numOfChannel = inf.channel_count()
 
 # Initialize the recorder 
 recorder = record.Recorder()
+recorder.filename_suffix = "Frequencies"
 
 # Processing parameters
 dataLengthSecs = 1
