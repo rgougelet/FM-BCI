@@ -1,7 +1,7 @@
 import scipy as sp
 import numpy as np
 
-def chan_fm_noisy(dataLengthSamples, sampleRate, oscCenter, oscModFreq, oscFreqDev, oscMean = 0, snr = 5, noiseMean = 0, noiseStdDev = 0.5, samplingNoiseAmp = 0.5): 
+def chan_fm_noisy(dataLengthSamples, sampleRate, oscCenter, oscModFreq, oscFreqDev, snr = 5, oscMean = 0, noiseMean = 0, noiseStdDev = 0.5, samplingNoiseAmp = 0.5): 
     sampleSpacing = 1.0 / sampleRate
     dataLengthSecs = dataLengthSamples/sampleRate
     t = np.arange(0,dataLengthSecs,sampleSpacing)      
@@ -32,7 +32,7 @@ def chan_fm(dataLengthSamples, sampleRate, oscCenter, oscModFreq, oscFreqDev, os
     voltageSamples = np.reshape(osc, ((dataLengthSamples,)))
     return voltageSamples
 
-def chan_sin_noisy(dataLengthSamples, sampleRate, oscCenter, oscMean = 0, snr = 5, noiseMean = 0, noiseStdDev = 0.5, samplingNoiseAmp = 0.5): 
+def chan_sin_noisy(dataLengthSamples, sampleRate, oscCenter, snr = 5, oscMean = 0, noiseMean = 0, noiseStdDev = 0.5, samplingNoiseAmp = 0.5): 
     sampleSpacing = 1.0 / sampleRate
     dataLengthSecs = dataLengthSamples/sampleRate
     t = np.arange(0,dataLengthSecs,sampleSpacing)      
@@ -65,7 +65,7 @@ def chan_sin(dataLengthSamples, sampleRate, oscCenter, oscAmp = 1):
 
 
 
-def fm_noisy(dataShape, sampleRate, oscCenter, oscModFreq, oscFreqDev, oscMean = 0, snr = 5, noiseMean = 0, noiseStdDev = 0.5, samplingNoiseAmp = 0.5): 
+def fm_noisy(dataShape, sampleRate, oscCenter, oscModFreq, oscFreqDev, snr = 5, oscMean = 0, noiseMean = 0, noiseStdDev = 0.5, samplingNoiseAmp = 0.5): 
     """ dataShape is (numOfChannel, dataLengthSamples) matrix """
     numOfChannel = int(dataShape[0])
     dataLengthSamples = int(dataShape[1])
@@ -108,7 +108,7 @@ def fm(dataShape, sampleRate, oscCenter, oscModFreq, oscFreqDev, oscAmp = 1):
     return voltageChunk
 
 
-def sin_noisy(dataShape, sampleRate, oscCenter, oscModFreq, oscFreqDev, oscMean = 0, snr = 5, noiseMean = 0, noiseStdDev = 0.5, samplingNoiseAmp = 0.5): 
+def sin_noisy(dataShape, sampleRate, oscCenter, oscModFreq, oscFreqDev, snr = 5, oscMean = 0,  noiseMean = 0, noiseStdDev = 0.5, samplingNoiseAmp = 0.5): 
     """ dataShape is (numOfChannel, dataLengthSamples) matrix """
     numOfChannel = int(dataShape[0])
     dataLengthSamples = int(dataShape[1])

@@ -1,8 +1,7 @@
 import platform
 import numpy as np
 import sys
-sys.path.insert(0, './pylsl')
-from pylsl import StreamInlet, resolve_stream, vectorf
+from pylsl import StreamInlet, resolve_stream, vectorf, StreamInfo, StreamOutlet
 import processing as p
 import record
 
@@ -13,8 +12,8 @@ for clearline in range(1,100):
 print("Looking for an EEG stream...")
 streams = []
 while not streams:
-    streams = pylsl.resolve_stream('name', 'SimulatedEEG')
-inlet = pylsl.StreamInlet(streams[0])
+    streams = resolve_stream('name', 'SimulatedEEG')
+inlet = StreamInlet(streams[0])
 
 # Extract stream info
 inf = inlet.info()
@@ -36,8 +35,8 @@ desiredFreqResolution = 0.01
 winLengthSamples = 512
 overlapSamples = 256
 
-info = pylsl.StreamInfo('BCI_Stream', 'EEG', 1, dataLengthSecs, 'float32', 'myuid34234')
-outlet = pylsl.StreamOutlet(info)
+info = StreamInfo('BCI_Stream', 'EEG', 1, dataLengthSecs, 'float32', 'myuid34234')
+outlet = StreamOutlet(info)
 output = np.empty(1)
 print("\n \nSending BCI data...")
 
@@ -58,16 +57,20 @@ while True:
         chanPeaks = np.empty([numOfChannel,])
         chanPeaksAmps = np.empty([numOfChannel,])
         for channelIndex in range(numOfChannel):
-            meanSpectrum = p.chan_welch(voltageSamples[channelIndex,:], sampleRate, desiredFreqResolution, winLengthSamples,overlapSamples)
-            chanPeak, peakAmp = p.chan_peak_freq(meanSpectrum, desiredFreqResolution)
+            freqs, meanSpectrum = p.chan_welch(voltageSamples[channelIndex,:], sampleRate, desiredFreqResolution, winLengthSamples,overlapSamples)
+            
+            chanPeak = p.chan_peak_freq(meanSpectrum, desiredFreqResolution)
             chanPeaks[channelIndex] = chanPeak
-            chanPeaksAmps[channelIndex] = peakAmp
+            #chanPeaksAmps[channelIndex] = peakAmp
             secChanPeaks = np.c_[secChanPeaks, chanPeaks] # append to storage array
-            secChanAmps = np.c_[secChanAmps, chanPeaksAmps]
+            #secChanAmps = np.c_[secChanAmps, chanPeaksAmps]
 
         output[:] = np.mean(chanPeaks)
         output = (12.-output)/4
         output = (1 if (output > 1) else output)
-        print("Peak Freq: "+str(chanPeaksAmps)+" Index:  "+str(output))
+        print("Peak Freq: "+str(chanPeaks))
+        #print("Peak Amps: "+str(chanPeaksAmps))
+        print("Index:  "+str(output))
+        print('\n \n')
         outlet.push_sample(output)
         sampleIndex = 0 # restart new chunk
