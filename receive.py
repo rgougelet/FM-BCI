@@ -42,8 +42,9 @@ print("\n \nSending BCI data...")
 
 print("Collecting data in "+str(dataLengthSecs)+" second chunks.")
 sampleIndex = 0
-secChanPeaks = np.zeros([numOfChannel,0]) # grows with every chunk and stores peaks for each channel
-secChanAmps = np.zeros([numOfChannel,0]) # grows with every chunk and stores peaks for each channel
+chunkChanPeaks = np.zeros([numOfChannel,0])
+chunkChanAmps = np.zeros([numOfChannel,0]) 
+chunkChanRatios = np.zeros([numOfChannel,0])
 while True:
 
     # populating the samples
@@ -55,21 +56,25 @@ while True:
     if sampleIndex == dataLengthSamples:
         voltageSamples = p.butter_bandpass_filter(voltageSamples,bandLow,bandHigh,sampleRate,orderFilter)
         chanPeaks = np.empty([numOfChannel,])
-        chanPeaksAmps = np.empty([numOfChannel,])
+        chanAmps = np.empty([numOfChannel,])
         for channelIndex in range(numOfChannel):
-            freqs, meanSpectrum = p.chan_welch(voltageSamples[channelIndex,:], sampleRate, desiredFreqResolution, winLengthSamples,overlapSamples)
+            meanSpectrum = p.chan_welch(voltageSamples[channelIndex,:], sampleRate, desiredFreqResolution, winLengthSamples,overlapSamples)
+            chanRatio = p.band_amp_ratio(meanSpectrum, desiredFreqResolution,bandLow,bandHigh)
+            chanPeak,chanPeakIndex = p.chan_peak_freq(meanSpectrum, desiredFreqResolution)
             
-            chanPeak = p.chan_peak_freq(meanSpectrum, desiredFreqResolution)
+            chanRatios[channelIndex] = chanRatio
             chanPeaks[channelIndex] = chanPeak
-            #chanPeaksAmps[channelIndex] = peakAmp
-            secChanPeaks = np.c_[secChanPeaks, chanPeaks] # append to storage array
-            #secChanAmps = np.c_[secChanAmps, chanPeaksAmps]
-
+            chanAmps[channelIndex] = meanSpectrum[chanPeakIndex]
+            
+            chunkChanPeaks = np.c_[chunkChanPeaks, chanPeaks] # append to storage array
+            chunkChanAmps = np.c_[chunkChanAmps, chanAmps]
+            chunkChanRatios = np.c_[chunkChanRatios, chanRatios]
+        print chanRatios
         output[:] = np.mean(chanPeaks)
         output = (12.-output)/4
         output = (1 if (output > 1) else output)
         print("Peak Freq: "+str(chanPeaks))
-        #print("Peak Amps: "+str(chanPeaksAmps))
+        #print("Peak Amps: "+str(chanAmps))
         print("Index:  "+str(output))
         print('\n \n')
         outlet.push_sample(output)

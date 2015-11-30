@@ -111,7 +111,7 @@ def chan_welch(voltageSamples, sampleRate, desiredFreqResolution, winLengthSampl
     sampleSpacing = 1.0/sampleRate        
     fftLengthSamples = int(sampleRate/desiredFreqResolution)
     f,pspec = sp.signal.welch(voltageSamples, fs=sampleRate, window='hanning', nperseg=fftLengthSamples, noverlap=overlapSamples, nfft=fftLengthSamples, detrend='linear', return_onesided=True, scaling='density')
-    return f,pspec
+    return pspec
     
 
 def mat_welch():
@@ -165,19 +165,21 @@ def chan_peak_freq(chanSpec, desiredFreqResolution):
     maxAmplitudeIndex = np.argmax(chanSpec)
     maxFreq = freqs[maxAmplitudeIndex]
     maxFreqAmp = chanSpec[maxAmplitudeIndex]
-    return maxFreq
+    return maxFreq, maxAmplitudeIndex
     
-def mean_band_amp(chanSpec, desiredFreqResolution, lower, upper):
+def band_amp_ratio(chanSpec, desiredFreqResolution, lower, upper):
     """ takes in an array of median spectrum and returns the peak frequency """
     freqs = np.empty(len(chanSpec))
     for i in range(0,len(chanSpec)):
         freqs[i] = i*desiredFreqResolution
     lowerIndex = np.where(freqs==lower)
+    print lowerIndex[0][0]
     upperIndex = np.where(freqs==upper)
-    maxAmplitudeIndex = np.argmax(chanSpec)
-    maxFreq = freqs[maxAmplitudeIndex]
-    maxFreqAmp = chanSpec[maxAmplitudeIndex]
-    return maxFreq, maxFreqAmp
+    print upperIndex[0][0]
+    band_amp = np.mean(chanSpec[int(lowerIndex):int(upperIndex)])
+    not_band_amp = np.mean(chanSpec[:lowerIndex])+np.mean(chanSpec[upperIndex:])
+
+    return band_amp/not_band_amp
 
 
 def chan_peak_freq_parab(chanSpec, desiredFreqResolution):
