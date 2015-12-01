@@ -88,9 +88,9 @@ while True:
         print('\n \n')
 
         # Record to file
-        recordFreq.write(storeChanPeakFreqs)
-        recordAmp.write(storeChanPeakAmps)
-        recordRatio.write(storeChanRatios)
+        recordFreq.write(chanPeakFreqs)
+        recordAmp.write(chanPeakAmps)
+        recordRatio.write(chanRatios)
         recordIndex.write(output)
 
         sampleIndex = 0 # restart new store
