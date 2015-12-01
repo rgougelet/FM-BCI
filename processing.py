@@ -167,19 +167,19 @@ def chan_peak_freq(chanSpec, desiredFreqResolution):
     maxFreqAmp = chanSpec[maxAmplitudeIndex]
     return maxFreq, maxAmplitudeIndex
     
-def band_amp_ratio(chanSpec, desiredFreqResolution, lower, upper):
+def chan_amp_ratio(chanSpec, desiredFreqResolution, lower, upper):
     """ takes in an array of median spectrum and returns the peak frequency """
     freqs = np.empty(len(chanSpec))
     for i in range(0,len(chanSpec)):
         freqs[i] = i*desiredFreqResolution
     lowerIndex = np.where(freqs==lower)
-    print lowerIndex[0][0]
+    lowerIndex = lowerIndex[0][0]
     upperIndex = np.where(freqs==upper)
-    print upperIndex[0][0]
-    band_amp = np.mean(chanSpec[int(lowerIndex):int(upperIndex)])
-    not_band_amp = np.mean(chanSpec[:lowerIndex])+np.mean(chanSpec[upperIndex:])
+    upperIndex = upperIndex[0][0]
+    band_amp = np.mean(chanSpec[lowerIndex:upperIndex])
+    mean_amp = np.mean(chanSpec)
 
-    return band_amp/not_band_amp
+    return band_amp/mean_amp
 
 
 def chan_peak_freq_parab(chanSpec, desiredFreqResolution):

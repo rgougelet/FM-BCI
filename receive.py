@@ -41,11 +41,11 @@ outlet = StreamOutlet(info)
 output = np.empty(1)
 print("\n \nSending BCI data...")
 
-print("Collecting data in "+str(dataLengthSecs)+" second chunks.")
+print("Collecting data in "+str(dataLengthSecs)+" second stores.")
 sampleIndex = 0
-chunkChanPeaks = np.zeros([numOfChannel,0])
-chunkChanAmps = np.zeros([numOfChannel,0]) 
-chunkChanRatios = np.zeros([numOfChannel,0])
+storeChanPeaks = np.zeros([numOfChannel,0])
+storeChanAmps = np.zeros([numOfChannel,0]) 
+storeChanRatios = np.zeros([numOfChannel,0])
 while True:
 
     # populating the samples
@@ -53,23 +53,25 @@ while True:
     voltageSamples[:, sampleIndex] = sample
     sampleIndex += 1
 
-    # process data chunk
+    # process data store
     if sampleIndex == dataLengthSamples:
         voltageSamples = p.butter_bandpass_filter(voltageSamples,bandLow,bandHigh,sampleRate,orderFilter)
         chanPeaks = np.empty([numOfChannel,])
         chanAmps = np.empty([numOfChannel,])
+        chanRatios = np.empty([numOfChannel])
         for channelIndex in range(numOfChannel):
             meanSpectrum = p.chan_welch(voltageSamples[channelIndex,:], sampleRate, desiredFreqResolution, winLengthSamples,overlapSamples)
-            chanRatio = p.band_amp_ratio(meanSpectrum, desiredFreqResolution,bandLow,bandHigh)
+            chanRatio = p.chan_amp_ratio(meanSpectrum, desiredFreqResolution,bandLow,bandHigh)
             chanPeak,chanPeakIndex = p.chan_peak_freq(meanSpectrum, desiredFreqResolution)
             
             chanRatios[channelIndex] = chanRatio
             chanPeaks[channelIndex] = chanPeak
             chanAmps[channelIndex] = meanSpectrum[chanPeakIndex]
             
-            chunkChanPeaks = np.c_[chunkChanPeaks, chanPeaks] # append to storage array
-            chunkChanAmps = np.c_[chunkChanAmps, chanAmps]
-            chunkChanRatios = np.c_[chunkChanRatios, chanRatios]
+            storeChanPeaks = np.c_[storeChanPeaks, chanPeaks] # append to storage array
+            storeChanAmps = np.c_[storeChanAmps, chanAmps]
+            storeChanRatios = np.c_[storeChanRatios, chanRatios]
+        print "Channel "+str(np.argmax(chanRatios)+1)+" has the highest alpha amp"
         print chanRatios
         output[:] = np.mean(chanPeaks)
         output = (12.-output)/4
@@ -79,4 +81,4 @@ while True:
         print("Index:  "+str(output))
         print('\n \n')
         outlet.push_sample(output)
-        sampleIndex = 0 # restart new chunk
+        sampleIndex = 0 # restart new store

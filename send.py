@@ -18,8 +18,8 @@ sampleRate = 1024.0
 numOfChannel = 8
 dataLengthSecs = 300
 dataLengthSamples = dataLengthSecs*sampleRate
-chanSNRs = np.linspace(1./numOfChannel,5,numOfChannel)
 voltageSamples = np.empty([numOfChannel,dataLengthSamples])
+chanSNRs = np.linspace(1./numOfChannel,5,numOfChannel)
 np.random.shuffle(chanSNRs)
 print chanSNRs
 for channelIndex in range(numOfChannel):
