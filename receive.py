@@ -74,9 +74,7 @@ while True:
         print "Channel "+str(np.argmax(chanRatios)+1)+" has the highest alpha amp"
         print chanRatios
         print("Peak Freq: "+str(chanPeakFreqs))
-        print("Index:  "+str(output))
-        print('\n \n')
-        
+
         # Compute input into interface
         #output[:] = np.mean(ChanPeakFreqs)
         output[:] = chanPeakFreqs[np.argmax(chanRatios)]
@@ -84,5 +82,7 @@ while True:
         output = (1 if (output > 1) else output)
         output = (0 if (output < 0) else output)
         outlet.push_sample(output)
+        print("Index:  "+str(output))
+        print('\n \n')
         
         sampleIndex = 0 # restart new store
