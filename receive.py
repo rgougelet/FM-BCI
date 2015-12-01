@@ -43,8 +43,8 @@ print("\n \nSending BCI data...")
 
 print("Collecting data in "+str(dataLengthSecs)+" second stores.")
 sampleIndex = 0
-storeChanPeaks = np.zeros([numOfChannel,0])
-storeChanAmps = np.zeros([numOfChannel,0]) 
+storeChanPeakFreqs = np.zeros([numOfChannel,0])
+storeChanPeakAmps = np.zeros([numOfChannel,0]) 
 storeChanRatios = np.zeros([numOfChannel,0])
 while True:
 
@@ -56,8 +56,8 @@ while True:
     # process data store
     if sampleIndex == dataLengthSamples:
         voltageSamples = p.butter_bandpass_filter(voltageSamples,bandLow,bandHigh,sampleRate,orderFilter)
-        chanPeaks = np.empty([numOfChannel,])
-        chanAmps = np.empty([numOfChannel,])
+        chanPeakFreqs = np.empty([numOfChannel,])
+        chanPeakAmps = np.empty([numOfChannel,])
         chanRatios = np.empty([numOfChannel])
         for channelIndex in range(numOfChannel):
             meanSpectrum = p.chan_welch(voltageSamples[channelIndex,:], sampleRate, desiredFreqResolution, winLengthSamples,overlapSamples)
@@ -65,20 +65,24 @@ while True:
             chanPeak,chanPeakIndex = p.chan_peak_freq(meanSpectrum, desiredFreqResolution)
             
             chanRatios[channelIndex] = chanRatio
-            chanPeaks[channelIndex] = chanPeak
-            chanAmps[channelIndex] = meanSpectrum[chanPeakIndex]
+            chanPeakFreqs[channelIndex] = chanPeak
+            chanPeakAmps[channelIndex] = meanSpectrum[chanPeakIndex]
             
-            storeChanPeaks = np.c_[storeChanPeaks, chanPeaks] # append to storage array
-            storeChanAmps = np.c_[storeChanAmps, chanAmps]
+            storeChanPeakFreqs = np.c_[storeChanPeakFreqs, chanPeakFreqs] # append to storage array
+            storeChanPeakAmps = np.c_[storeChanPeakAmps, chanPeakAmps]
             storeChanRatios = np.c_[storeChanRatios, chanRatios]
         print "Channel "+str(np.argmax(chanRatios)+1)+" has the highest alpha amp"
         print chanRatios
-        output[:] = np.mean(chanPeaks)
-        output = (12.-output)/4
-        output = (1 if (output > 1) else output)
-        print("Peak Freq: "+str(chanPeaks))
-        #print("Peak Amps: "+str(chanAmps))
+        print("Peak Freq: "+str(chanPeakFreqs))
         print("Index:  "+str(output))
         print('\n \n')
+        
+        # Compute input into interface
+        #output[:] = np.mean(ChanPeakFreqs)
+        output[:] = chanPeakFreqs[np.argmax(chanRatios)]
+        output = (12.-output)/4
+        output = (1 if (output > 1) else output)
+        output = (0 if (output < 0) else output)
         outlet.push_sample(output)
+        
         sampleIndex = 0 # restart new store
