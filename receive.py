@@ -22,8 +22,10 @@ numOfChannel = inf.channel_count()
 #sample = pylsl.vectorf()
 
 # Initialize the recorder 
-recorder = record.Recorder()
-recorder.filename_suffix = "Frequencies"
+recordFreq = record.Recorder("_Frequency")
+recordAmp = record.Recorder("_Amplitude")
+recordRatio = record.Recorder("_Ratio")
+recordIndex = record.Recorder("_Index")
 
 # Processing parameters
 dataLengthSecs = 1
@@ -86,5 +88,11 @@ while True:
         outlet.push_sample(output)
         print("Index:  "+str(output))
         print('\n \n')
-        
+
+        # Record to file
+        recordFreq.write(storeChanPeakFreqs)
+        recordAmp.write(storeChanPeakAmps)
+        recordRatio.write(storeChanRatios)
+        recordIndex.write(output)
+
         sampleIndex = 0 # restart new store
