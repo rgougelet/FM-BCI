@@ -20,6 +20,7 @@ class Main(LatentModule):
         streams = pylsl.resolve_stream('name', 'BCI_Stream')
         print("Stream found.")
         inlet = pylsl.StreamInlet(streams[0])
+        
 
         # Extract stream info
         inf = inlet.info()
@@ -33,11 +34,16 @@ class Main(LatentModule):
 
         ## Sets background color to gray
         base.win.setClearColor((0.75, 0.75, 0.75, 1))
+        
+        
+        self.marker('')  # emit an event marker to indicate the beginning of the experiment
+        self.write('Touch the screen when you are ready','mouse1')
         cross = self.crosshair(0,size=0.2,width=0.005,block=False)
-
+        frameCount = 0
         while True:
             bci, timestamp = inlet.pull_sample()
-            self.marker("NewFrame_"+str(bci)+"_"+str(timestamp))
+            self.marker("NewFrame_"+str(frameCount)+"_"+str(bci[0])+"_"+str(timestamp))
             rect1 = self.rectangle([-0.4,-0.6,(bci[0]*1.5)-0.75,-0.75],duration=1000,color=[0,0,0,1],block=False)
             rect2 = self.rectangle([0.4,0.6,(bci[0]*1.5)-0.75,-0.75],duration=1,color=[0,0,0,1],block=True)
             rect1.destroy()
+            frameCount+=1

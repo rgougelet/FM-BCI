@@ -14,6 +14,7 @@ class Recorder:
 
     def __init__(self, nameExtra = "", overrideName = False):
         if platform.system() == "Windows":
+            print "Writing on Windows system..."
             self.create_directory(".\\recordings")
             self.saved_directory = ".\\recordings\\"
             if not overrideName:
@@ -31,6 +32,7 @@ class Recorder:
     def create_directory(self, path):
         """ create directories for eeg recordings"""
         try:
+            print "Making directory"
             os.makedirs(path)
         except OSError as exception:
             if exception.errno != errno.EEXIST:
