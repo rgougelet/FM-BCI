@@ -35,6 +35,7 @@ class Main(LatentModule):
 
         while True:
             bci, timestamp = inlet.pull_sample()
-            rect1 = self.rectangle([-0.4,-0.6,(bci[0]*1.5)-0.75,-0.75],duration=1000,color=[0,0,0,1],block=False)
-            rect2 = self.rectangle([0.4,0.6,(bci[0]*1.5)-0.75,-0.75],duration=1,color=[0,0,0,1],block=True)
+            self.marker("NewFrame_"+str(bci)+"_"+str(timestamp)
+            rect1 = self.rectangle([-0.4,-0.6,(-bci[0]*1.5)-0.75,-0.75],duration=1000,color=[0,0,0,1],block=False)
+            rect2 = self.rectangle([0.4,0.6,(-bci[0]*1.5)-0.75,-0.75],duration=1,color=[0,0,0,1],block=True)
             rect1.destroy()
