@@ -73,14 +73,16 @@ while True:
             storeChanPeakFreqs = np.c_[storeChanPeakFreqs, chanPeakFreqs] # append to storage array
             storeChanPeakAmps = np.c_[storeChanPeakAmps, chanPeakAmps]
             storeChanRatios = np.c_[storeChanRatios, chanRatios]
+        
+        maxChannelIndex = np.argmax(chanRatios)
         print "Channel "+str(np.argmax(chanRatios)+1)+" has the highest alpha amp"
         print chanRatios
-        print("Peak Freq: "+str(chanPeakFreqs))
+        print("Peak Freq: "+str(chanPeakFreqs[maxChannelIndex]))
 
         # Compute input into interface
         #output[:] = np.mean(ChanPeakFreqs)
-        output[:] = chanPeakFreqs[np.argmax(chanRatios)]
-        output = (12.-output)/4
+        output[:] = chanPeakFreqs[maxChannelIndex]
+        output = -((12.-output)/4)+1
         output = (1 if (output > 1) else output)
         output = (0 if (output < 0) else output)
         outlet.push_sample(output)
