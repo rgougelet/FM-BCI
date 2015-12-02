@@ -84,7 +84,9 @@ def chan_autocorr(voltageSamples, sampleRate, desiredFreqResolution):
         return dbFFTAh
 
 def peak_freq(chanSpec, desiredFreqResolution):
-    """ takes in a matrix of median spectrum (numOfChannel X len(freqs)) and returns the peak frequencys """
+    """ takes in a matrix of median spectrum (numOfChannel X len(freqs))  
+        returns the peak frequencys 
+    """
     numOfChannel = chanSpec.shape[0]
     peak_alpha_freq = np.empty([numOfChannel,])
     for channelIndex in range(numOfChannel):
@@ -142,7 +144,9 @@ def chan_spect_median(voltageSamples, sampleRate, desiredFreqResolution, winLeng
     return medianSpectrum
     
 def chan_peak_freq(chanSpec, desiredFreqResolution):
-    """ takes in an array of median spectrum and returns the peak frequency """
+    """ takes in an array of median spectrum 
+        returns the peak frequency 
+    """
     freqs = np.empty(len(chanSpec))
     for i in range(0,len(chanSpec)):
         freqs[i] = i*desiredFreqResolution
@@ -152,7 +156,12 @@ def chan_peak_freq(chanSpec, desiredFreqResolution):
     return maxFreq, maxAmplitudeIndex
     
 def chan_amp_ratio(chanSpec, desiredFreqResolution, lower, upper):
-    """ takes in an array of median spectrum and returns the peak frequency """
+    """ Takes in the spectrum with lower and upper bound.
+        Returns the signal to noise ratio for the channel. The biggest 
+        signal/noise ratio(the bigger the ratio means the smaller the noise) 
+        is used to determine the channel such that the channels' alpha band's
+        amplitude is the highest in the spectrum. 
+    """
     freqs = np.empty(len(chanSpec))
     for i in range(0,len(chanSpec)):
         freqs[i] = i*desiredFreqResolution
