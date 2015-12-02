@@ -5,7 +5,8 @@ import scipy.fftpack
 from scipy import signal
 from scipy.signal import butter, lfilter  
 import matplotlib.pyplot as plt
-
+from scikits.talkbox import lpc
+import time
 
 def spect_median(voltageSamples, sampleRate, desiredFreqResolution, winLengthSamples, overlapSamples):
     """ voltageSamples is a (numOfChannel X dataLengthSamples) matrix, 
@@ -49,6 +50,38 @@ def spect_median(voltageSamples, sampleRate, desiredFreqResolution, winLengthSam
         
     return medianSpecMat
     
+def chan_autocorr(voltageSamples, sampleRate, desiredFreqResolution):
+        voltageSamples = signal.detrend(voltageSamples, axis=-1, type='linear')
+        voltageSamples = voltageSamples * signal.hanning(len(voltageSamples))
+        
+        # orderAxis = range(0,len(voltageSamples))
+        # errors = np.empty([len(orderAxis),])
+        # for order in orderAxis:
+            # lpcp, g, k = lpc(voltageSamples,order)
+            # errors[order] = g
+        # fig=plt.figure(figsize=(12, 9))
+        # plt.plot(orderAxis,np.abs(errors))
+        # minError = np.argmax(np.abs(errors))
+        # print minError
+        # plt.xlabel('Inverse Filter Order')
+        # plt.ylabel('Error')
+        # plt.grid()
+        # plt.show()
+        
+        fftLengthSamples = int(sampleRate/desiredFreqResolution)
+        lpcp, g, k = lpc(voltageSamples,len(voltageSamples)/8)
+        lpcp = np.array(lpcp)
+        padLength = fftLengthSamples-len(lpcp)
+        padding = np.zeros(padLength)
+        Ahat = np.concatenate((lpcp, padding), axis=1)
+        FFTAh = np.fft.fft(Ahat,fftLengthSamples)
+        halfFFTAh = FFTAh[:((fftLengthSamples/2))]
+        magFFTAh = np.square(np.abs(halfFFTAh));
+        dbFFTAh = 10*np.log10(1/magFFTAh);
+        #dbFFTAh = dbFFTAh - np.max(dbFFTAh);
+        #freqs = (sampleRate/2)*np.linspace(0,1,fftLengthSamples/2)
+
+        return dbFFTAh
 
 def peak_freq(chanSpec, desiredFreqResolution):
     """ takes in a matrix of median spectrum (numOfChannel X len(freqs)) and returns the peak frequencys """
@@ -59,52 +92,6 @@ def peak_freq(chanSpec, desiredFreqResolution):
         peak_alpha_freq[channelIndex] = medianPeak
     return peak_alpha_freq
 
-
-# original mat_spect_median by Robert
-
-# def mat_spect_median(voltageSamples, sampleRate, desiredFreqResolution, winLengthSamples):
-#     """ voltageSamples is a (numOfChannel X dataLengthSamples) matrix """
-
-#     # Universal FFT parameters
-#     numOfChannel = voltageSamples.shape[0]
-#     dataLengthSamples = voltageSamples.shape[1]
-#     dataLengthSecs = (int)(dataLengthSamples / sampleRate) 
-#     sampleSpacing = 1.0 / sampleRate        
-#     nyq = 0.5 * sampleRate
-#     fftLengthSamples = int(sampleRate/desiredFreqResolution)
-#     freqs = scipy.fftpack.rfftfreq(fftLengthSamples,sampleSpacing) # retrieve frequency axis
-#     dataTime = np.arange(0,dataLengthSecs,sampleSpacing)
-    
-#     # Window data FFT parameters
-#     winLengthSecs = winLengthSamples/sampleRate
-#     numOfWindows = int(dataLengthSamples/winLengthSamples) # determine number of windows
-#     winTime = np.arange(0,winLengthSecs,sampleSpacing)
-    
-#     # going through each channel to plot fft result
-#     channelPeaks = np.empty([numOfChannel, numOfWindows]) # container for peak frequencies for each channel every second
-    
-#     for channelIndex in range(0,numOfChannel):
-#         channelVoltage = voltageSamples[channelIndex,:]
-#         channelWinSpectra = np.empty([len(freqs), numOfWindows])
-#         for winIndex in range(0,numOfWindows):
-#             # get next window of data, detrend
-#             channelVoltageWin = channelVoltage[winIndex*winLengthSamples:(winIndex+1)*winLengthSamples]
-#             channelVoltageWin = channelVoltageWin - np.mean(channelVoltageWin)
-            
-#             # window window
-#             #windowedWin = channelVoltage * signal.blackmanharris(winLengthSamples)
-#             windowedWin = channelVoltageWin * signal.gaussian(winLengthSamples, std=8,sym=False)
-
-#             # compute fft
-#             nyq = 0.5 * sampleRate # maximum possible frequency to measure
-#             amp = abs(scipy.fftpack.rfft(windowedWin,fftLengthSamples)) # determine amplitude spectrum by taking abs
-#             channelWinSpectra[:,winIndex] = amp
-            
-#         medianSpectrum = np.transpose(np.median(channelWinSpectra,1))
-        
-#     return medianSpectrum
-
-
 def chan_welch(voltageSamples, sampleRate, desiredFreqResolution, winLengthSamples, overlapSamples):
     dataLengthSamples = len(voltageSamples)
     dataLengthSecs = dataLengthSamples / sampleRate
@@ -113,11 +100,9 @@ def chan_welch(voltageSamples, sampleRate, desiredFreqResolution, winLengthSampl
     f,pspec = sp.signal.welch(voltageSamples, fs=sampleRate, window='hanning', nperseg=fftLengthSamples, noverlap=overlapSamples, nfft=fftLengthSamples, detrend='linear', return_onesided=True, scaling='density')
     return pspec
     
-
 def mat_welch():
     return
 
-    
 def chan_spect_median(voltageSamples, sampleRate, desiredFreqResolution, winLengthSamples, overlapSamples):
     """ voltageSamples is an array contains voltage samples, 
         returns the array that contains the median spectrum from welch like method 
@@ -156,7 +141,6 @@ def chan_spect_median(voltageSamples, sampleRate, desiredFreqResolution, winLeng
         
     return medianSpectrum
     
-
 def chan_peak_freq(chanSpec, desiredFreqResolution):
     """ takes in an array of median spectrum and returns the peak frequency """
     freqs = np.empty(len(chanSpec))
@@ -181,7 +165,6 @@ def chan_amp_ratio(chanSpec, desiredFreqResolution, lower, upper):
 
     return band_amp/mean_amp
 
-
 def chan_peak_freq_parab(chanSpec, desiredFreqResolution):
     from parabolic import parabolic
     freqs = np.empty(len(chanSpec))
@@ -192,7 +175,6 @@ def chan_peak_freq_parab(chanSpec, desiredFreqResolution):
     maxAmplitudeIndex = parabolic(np.log(chanSpec), np.argmax(chanSpec)-1)[0]
     maxFreq =  freqs[-1] * maxAmplitudeIndex / fftLengthSamples
 
-
 def butter_bandpass_filter(mydata, lowcut, highcut, fs, order=4):
     """ takes in a matrix of sample data (numOfChannel X dataLengthSamples) and filter out the alpha freq"""
     nyq = 0.5 * fs
@@ -202,7 +184,6 @@ def butter_bandpass_filter(mydata, lowcut, highcut, fs, order=4):
     y = sp.signal.filtfilt(b, a, mydata)
     return y
 
-
 def chan_plot_time(t,channelVoltage):
     fig=plt.figure(figsize=(12, 9))
     plt.plot(t,channelVoltage)
@@ -210,7 +191,6 @@ def chan_plot_time(t,channelVoltage):
     plt.ylabel('Voltage [V]')
     plt.grid()
     plt.draw()
-    
     
 def chan_plot_freq(chanSpec, desiredFreqResolution):
     freqs = np.empty(len(chanSpec))

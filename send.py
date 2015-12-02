@@ -5,11 +5,11 @@ import processing as p
 import numpy as np
 import random
 
-for clearline in range(1,100):
+for clearline in range(1,10):
     print('\n')
     
 # frequency modulation parameters
-alphaCenter = 10.25   # Hz the carrier frequency
+alphaCenter = 10   # Hz the carrier frequency
 alphaModFreq = 0.1  # Hz the modulating frequency
 alphaFreqDev = 1    # Hz of the frequency deviation
 
@@ -19,8 +19,8 @@ numOfChannel = 8
 dataLengthSecs = 300
 dataLengthSamples = dataLengthSecs*sampleRate
 voltageSamples = np.empty([numOfChannel,dataLengthSamples])
-chanSNRs = np.linspace(1./numOfChannel,5,numOfChannel)
-np.random.shuffle(chanSNRs)
+chanSNRs = np.linspace(1./numOfChannel,10,numOfChannel)
+#np.random.shuffle(chanSNRs)
 print chanSNRs
 for channelIndex in range(numOfChannel):
     voltageSamples[channelIndex,:] = o.chan_fm_noisy(dataLengthSamples, sampleRate, alphaCenter, alphaModFreq, alphaFreqDev, chanSNRs[channelIndex])
