@@ -5,7 +5,7 @@ import scipy.fftpack
 from scipy import signal
 from scipy.signal import butter, lfilter  
 import matplotlib.pyplot as plt
-from scikits.talkbox import lpc
+#from scikits.talkbox import lpc
 import time
 
 def spect_median(voltageSamples, sampleRate, desiredFreqResolution, winLengthSamples, overlapSamples):
