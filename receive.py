@@ -1,15 +1,14 @@
-import platform
 import numpy as np
-import sys
+#from numpy import fft
 from pylsl import StreamInlet, resolve_stream, vectorf, StreamInfo, StreamOutlet
 import processing as p
 import record
 from scikits.talkbox import lpc
 from scipy import signal
 import matplotlib.pyplot as plt
-from numpy import fft
 
-for clearline in range(1,10):
+
+for clearline in range(1,20):
     print('\n')
 
 # initialize data stream
@@ -34,11 +33,11 @@ recordIndex = record.Recorder("_Index")
 # Processing parameters
 dataLengthSecs = 1
 dataLengthSamples = int(dataLengthSecs * sampleRate)
-bandLow = 2                                # lower alpha band 
-bandHigh = 20                             # higher alpha band
+bandLow = 8                                # lower alpha band 
+bandHigh = 12                             # higher alpha band
 orderFilter = 4
 voltageSamples = np.empty([numOfChannel,dataLengthSamples])
-desiredFreqResolution = 0.05
+desiredFreqResolution = 0.01
 winLengthSamples = 512
 overlapSamples = 256
 
@@ -60,20 +59,21 @@ while True:
     sampleIndex += 1
     # process data store
     if sampleIndex == dataLengthSamples:
-
+        
         # chanPeakFreqs = np.empty([numOfChannel,])
         # chanPeakAmps = np.empty([numOfChannel,])
         # chanRatios = np.empty([numOfChannel])
         voltageSamples = p.butter_bandpass_filter(voltageSamples,bandLow,bandHigh,sampleRate,orderFilter)
             
         for channelIndex in range(numOfChannel):
+            
             blah = p.chan_autocorr(voltageSamples[channelIndex,:], sampleRate, desiredFreqResolution)
  
-            p.chan_plot_freq(blah, desiredFreqResolution)
+            #p.chan_plot_freq(blah, desiredFreqResolution)
             print "Channel ", channelIndex+1
-            plt.xlim(8,12)
-            plt.ylim(-50,0)
-            plt.show()
+            #plt.xlim(0,30)
+            #plt.ylim(-50,0)
+            #plt.show()
             # meanSpectrum = p.chan_welch(voltageSamples[channelIndex,:], sampleRate, desiredFreqResolution, winLengthSamples,overlapSamples)
             # chanRatio = p.chan_amp_ratio(meanSpectrum, desiredFreqResolution,bandLow,bandHigh)
             # chanPeak,chanPeakIndex = p.chan_peak_freq(meanSpectrum, desiredFreqResolution)

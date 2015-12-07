@@ -49,9 +49,18 @@ def spect_median(voltageSamples, sampleRate, desiredFreqResolution, winLengthSam
         medianSpecMat[channelIndex,:] = medianSpectrum
         
     return medianSpecMat
+def chan_per(voltageSamples, sampleRate):
+    f, t, Sxx = signal.spectrogram(voltageSamples, sampleRate)
+    plt.pcolormesh(t, f, Sxx)
+    plt.title('Channel '+str(channelIndex+1))
+    plt.ylabel('Frequency [Hz]')
+    plt.xlabel('Time [sec]')
+    plt.show()
     
 def chan_autocorr(voltageSamples, sampleRate, desiredFreqResolution):
+        
         voltageSamples = signal.detrend(voltageSamples, axis=-1, type='linear')
+        voltageSamples = np.pad(voltageSamples,(2,), 'mean')
         voltageSamples = voltageSamples * signal.hanning(len(voltageSamples))
         
         orderAxis = range(0,len(voltageSamples))
@@ -62,18 +71,29 @@ def chan_autocorr(voltageSamples, sampleRate, desiredFreqResolution):
         
         # fig=plt.figure(figsize=(12, 9))
         # plt.plot(orderAxis,np.abs(errors))
-        minError = np.argmax(np.abs(errors))
-        if minError == 0:
-            minError = 14
-        print minError
+        #minError = np.argmax(np.abs(errors))
+        #if minError == 0:
+        #    minError = 14
+        #print minError
         # plt.xlabel('Inverse Filter Order')
         # plt.ylabel('Error')
         # plt.grid()
         # plt.show()
         
         fftLengthSamples = int(sampleRate/desiredFreqResolution)
-        lpcp, g, k = lpc(voltageSamples,minError)
+        # lpcp, g, k = lpc(voltageSamples,minError)
+        lpcp, g, k = lpc(voltageSamples,4)
         lpcp = np.array(lpcp)
+        rts = np.roots(lpcp)
+        rts = rts[np.imag(rts)>=0];
+        angz = np.arctan2(np.imag(rts),np.real(rts))
+        frqs = np.sort(angz*sampleRate/(2*np.pi))
+        pks = np.empty(0)
+        for kk in range(len(frqs)):
+            if (frqs[kk] > 6 and frqs[kk] < 14):
+                pks = np.append(pks,frqs[kk])
+        peak_freq = np.mean(pks)
+        #print peak_freq
         padLength = fftLengthSamples-len(lpcp)
         padding = np.zeros(padLength)
         Ahat = np.concatenate((lpcp, padding), axis=1)
@@ -81,7 +101,6 @@ def chan_autocorr(voltageSamples, sampleRate, desiredFreqResolution):
         halfFFTAh = FFTAh[:((fftLengthSamples/2))]
         magFFTAh = np.square(np.abs(halfFFTAh));
         dbFFTAh = 10*np.log10(1/magFFTAh);
-        dbFFTAh = dbFFTAh - np.max(dbFFTAh);
         #freqs = (sampleRate/2)*np.linspace(0,1,fftLengthSamples/2)
 
         return dbFFTAh

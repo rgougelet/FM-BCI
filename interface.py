@@ -12,7 +12,7 @@ class Main(LatentModule):
 
     def run(self):
 
-        for clearline in range(1,100):
+        for clearline in range(1,20):
             print('\n')
     
         # initialize data stream
