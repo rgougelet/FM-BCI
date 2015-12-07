@@ -16,7 +16,7 @@ def chan_fm_noisy(dataLengthSamples, sampleRate, oscCenter, oscModFreq, oscFreqD
     pinkNoise = np.cumsum(normalNoise)
     
     # Frequency modulated oscillation, a sinusoidal baseband signal
-    osc = oscAmp*np.sin( oscCenter  * 2.0 * np.pi * t + oscFreqDev*np.sin(2 * np.pi * oscModFreq * t) / oscModFreq)
+    osc = oscAmp*np.cos( oscCenter  * 2.0 * np.pi * t + oscFreqDev*np.cos(2 * np.pi * oscModFreq * t) / oscModFreq)
 
     # Oscillation + 1/f noise + additional random noise
     voltageSamples = osc + pinkNoise + samplingNoiseAmp * np.random.random([1,dataLengthSamples])  
@@ -28,10 +28,37 @@ def chan_fm(dataLengthSamples, sampleRate, oscCenter, oscModFreq, oscFreqDev, os
     dataLengthSecs = dataLengthSamples/sampleRate
     t = np.arange(0,dataLengthSecs,sampleSpacing)      
     h = oscFreqDev/oscModFreq # Modulation index, < 1 narrowband, > 1 wideband
-    osc = oscAmp*np.sin( oscCenter  * 2.0 * np.pi * t + oscFreqDev*np.sin(2 * np.pi * oscModFreq * t) / oscModFreq)
+    fc = oscCenter  * 2.0 * np.pi * t
+    fm = (oscFreqDev*np.cos(2 * np.pi * oscModFreq * t) / oscModFreq)
+    osc = oscAmp*np.cos(fc + fm)
     voltageSamples = np.reshape(osc, ((dataLengthSamples,)))
     return voltageSamples
 
+def chan_fm_phase(dataLengthSamples, sampleRate, oscCenter, oscModFreq, oscFreqDev, oscAmp = 1):
+    sampleSpacing = 1.0 / sampleRate
+    dataLengthSecs = dataLengthSamples/sampleRate
+    t = np.arange(0,dataLengthSecs,sampleSpacing)      
+    h = oscFreqDev/oscModFreq # Modulation index, < 1 narrowband, > 1 wideband
+    fc = oscCenter  * 2.0 * np.pi * t
+    fm = (oscFreqDev*np.cos(2 * np.pi * oscModFreq * t) / oscModFreq)
+    osc = oscAmp*np.cos(fc + fm)
+    voltageSamples = np.reshape(osc, ((dataLengthSamples,)))
+    inst = fc+fm
+    phase = ( inst + np.pi) % (2 * np.pi ) - np.pi
+    return phase
+    
+def chan_fm_freq(dataLengthSamples, sampleRate, oscCenter, oscModFreq, oscFreqDev, oscAmp = 1):
+    sampleSpacing = 1.0 / sampleRate
+    dataLengthSecs = dataLengthSamples/sampleRate
+    t = np.arange(0,dataLengthSecs,sampleSpacing)      
+    h = oscFreqDev/oscModFreq # Modulation index, < 1 narrowband, > 1 wideband
+    fc = oscCenter  * 2.0 * np.pi * t
+    fm = (oscFreqDev*np.cos(2 * np.pi * oscModFreq * t) / oscModFreq)
+    osc = oscAmp*np.cos(fc + fm)
+    voltageSamples = np.reshape(osc, ((dataLengthSamples,)))
+    instFreq = sampleRate/(2*np.pi)*np.diff(fc+fm)
+    return instFreq
+    
 def chan_sin_noisy(dataLengthSamples, sampleRate, oscCenter, snr = 5, oscMean = 0, noiseMean = 0, noiseStdDev = 0.5, samplingNoiseAmp = 0.5): 
     sampleSpacing = 1.0 / sampleRate
     dataLengthSecs = dataLengthSamples/sampleRate
@@ -46,7 +73,7 @@ def chan_sin_noisy(dataLengthSamples, sampleRate, oscCenter, snr = 5, oscMean = 
     pinkNoise = np.cumsum(normalNoise)
     
     # Frequency modulated osc rhythm, a sinusoidal baseband signal
-    osc = oscAmp * np.sin(oscCenter * 2.0 * np.pi * t)
+    osc = oscAmp * np.cos(oscCenter * 2.0 * np.pi * t)
 
     # osc rhythm + 1/f noise + additional random noise
     voltageSamples = osc + pinkNoise + samplingNoiseAmp * np.random.random([1,dataLengthSamples])  
@@ -59,11 +86,9 @@ def chan_sin(dataLengthSamples, sampleRate, oscCenter, oscAmp = 1):
     sampleSpacing = 1.0 / sampleRate
     dataLengthSecs = dataLengthSamples/sampleRate
     t = np.arange(0,dataLengthSecs,sampleSpacing)      
-    osc = oscAmp * np.sin(oscCenter * 2.0 * np.pi * t)
+    osc = oscAmp * np.cos(oscCenter * 2.0 * np.pi * t)
     voltageSamples = np.reshape(osc, ((dataLengthSamples,)))
     return voltageSamples
-
-
 
 def fm_noisy(dataShape, sampleRate, oscCenter, oscModFreq, oscFreqDev, snr = 5, oscMean = 0, noiseMean = 0, noiseStdDev = 0.5, samplingNoiseAmp = 0.5): 
     """ dataShape is (numOfChannel, dataLengthSamples) matrix """
@@ -83,7 +108,7 @@ def fm_noisy(dataShape, sampleRate, oscCenter, oscModFreq, oscFreqDev, snr = 5, 
     pinkNoise = np.cumsum(normalNoise)
     
     # Frequency modulated oscillation, a sinusoidal baseband signal
-    osc = oscAmp*np.sin( oscCenter  * 2.0 * np.pi * t + oscFreqDev*np.sin(2 * np.pi * oscModFreq * t) / oscModFreq)
+    osc = oscAmp*np.cos( oscCenter  * 2.0 * np.pi * t + oscFreqDev*np.cos(2 * np.pi * oscModFreq * t) / oscModFreq)
 
     # Oscillation + 1/f noise + additional random noise
     voltageSamples = osc + pinkNoise + samplingNoiseAmp * np.random.random([1,dataLengthSamples])  
@@ -125,7 +150,7 @@ def sin_noisy(dataShape, sampleRate, oscCenter, oscModFreq, oscFreqDev, snr = 5,
     pinkNoise = np.cumsum(normalNoise)
     
     # Frequency modulated osc rhythm, a sinusoidal baseband signal
-    osc = oscAmp * np.sin(oscCenter * 2.0 * np.pi * t)
+    osc = oscAmp * np.cos(oscCenter * 2.0 * np.pi * t)
 
     # osc rhythm + 1/f noise + additional random noise
     voltageSamples = osc + pinkNoise + samplingNoiseAmp * np.random.random([1,dataLengthSamples])  

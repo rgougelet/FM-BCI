@@ -39,6 +39,7 @@ Thumbs.db
 *.ipynb_checkpoints
 *.pyc
 /**/*.pyc
+/pylsl/*.pyc
 
 
 #  Recordings  #
