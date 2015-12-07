@@ -54,22 +54,25 @@ def chan_autocorr(voltageSamples, sampleRate, desiredFreqResolution):
         voltageSamples = signal.detrend(voltageSamples, axis=-1, type='linear')
         voltageSamples = voltageSamples * signal.hanning(len(voltageSamples))
         
-        # orderAxis = range(0,len(voltageSamples))
-        # errors = np.empty([len(orderAxis),])
-        # for order in orderAxis:
-            # lpcp, g, k = lpc(voltageSamples,order)
-            # errors[order] = g
+        orderAxis = range(0,len(voltageSamples))
+        errors = np.empty([len(orderAxis),])
+        for order in orderAxis:
+            lpcp, g, k = lpc(voltageSamples,order)
+            errors[order] = g
+        
         # fig=plt.figure(figsize=(12, 9))
         # plt.plot(orderAxis,np.abs(errors))
-        # minError = np.argmax(np.abs(errors))
-        # print minError
+        minError = np.argmax(np.abs(errors))
+        if minError == 0:
+            minError = 14
+        print minError
         # plt.xlabel('Inverse Filter Order')
         # plt.ylabel('Error')
         # plt.grid()
         # plt.show()
         
         fftLengthSamples = int(sampleRate/desiredFreqResolution)
-        lpcp, g, k = lpc(voltageSamples,len(voltageSamples)/8)
+        lpcp, g, k = lpc(voltageSamples,minError)
         lpcp = np.array(lpcp)
         padLength = fftLengthSamples-len(lpcp)
         padding = np.zeros(padLength)
@@ -78,7 +81,7 @@ def chan_autocorr(voltageSamples, sampleRate, desiredFreqResolution):
         halfFFTAh = FFTAh[:((fftLengthSamples/2))]
         magFFTAh = np.square(np.abs(halfFFTAh));
         dbFFTAh = 10*np.log10(1/magFFTAh);
-        #dbFFTAh = dbFFTAh - np.max(dbFFTAh);
+        dbFFTAh = dbFFTAh - np.max(dbFFTAh);
         #freqs = (sampleRate/2)*np.linspace(0,1,fftLengthSamples/2)
 
         return dbFFTAh

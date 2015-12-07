@@ -23,7 +23,8 @@ chanSNRs = np.linspace(1./numOfChannel,10,numOfChannel)
 #np.random.shuffle(chanSNRs)
 print chanSNRs
 for channelIndex in range(numOfChannel):
-    voltageSamples[channelIndex,:] = o.chan_fm_noisy(dataLengthSamples, sampleRate, alphaCenter, alphaModFreq, alphaFreqDev, chanSNRs[channelIndex])
+    voltageSamples[channelIndex,:] = o.chan_sin_noisy(dataLengthSamples, sampleRate, alphaCenter, alphaModFreq, alphaFreqDev, chanSNRs[channelIndex])
+    # voltageSamples[channelIndex,:] = o.chan_sin(dataLengthSamples, sampleRate, 10, chanSNRs[channelIndex])
 voltageSamples[7,:] = o.chan_fm(dataLengthSamples, sampleRate, alphaCenter, alphaModFreq, alphaFreqDev) # ground truth
 
 # create outlet for output

@@ -63,8 +63,6 @@ def chan_sin(dataLengthSamples, sampleRate, oscCenter, oscAmp = 1):
     voltageSamples = np.reshape(osc, ((dataLengthSamples,)))
     return voltageSamples
 
-
-
 def fm_noisy(dataShape, sampleRate, oscCenter, oscModFreq, oscFreqDev, snr = 5, oscMean = 0, noiseMean = 0, noiseStdDev = 0.5, samplingNoiseAmp = 0.5): 
     """ dataShape is (numOfChannel, dataLengthSamples) matrix """
     numOfChannel = int(dataShape[0])
