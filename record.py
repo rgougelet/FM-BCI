@@ -42,7 +42,15 @@ class Recorder:
             self.target_file.write("\n")
 
     def delete_recordings(self):
-        shutil.rmtree('./recordings')
+        """ Deletes all files and folders contained in the directory """
+        for the_file in os.listdir(self.saved_directory):
+            file_path = os.path.join(self.saved_directory, the_file)
+            try:
+                if os.path.isfile(file_path):
+                    os.unlink(file_path)
+                #elif os.path.isdir(file_path): shutil.rmtree(file_path)
+            except Exception, e:
+                print e
 
     #providing name for the file to be created
     def record_new(self):
