@@ -6,6 +6,7 @@ from scipy import signal
 from scipy.signal import butter, lfilter  
 import matplotlib.pyplot as plt
 # from scikits.talkbox import lpc
+
 import time
 
 def spect_median(voltageSamples, sampleRate, desiredFreqResolution, winLengthSamples, overlapSamples):
@@ -117,6 +118,7 @@ def peak_freq(chanSpec, desiredFreqResolution):
     return peak_alpha_freq
 
 def chan_welch(voltageSamples, sampleRate, desiredFreqResolution, winLengthSamples, overlapSamples):
+    """ Uses welch's metohd to estimate the mean spectrum and returns it """ 
     dataLengthSamples = len(voltageSamples)
     dataLengthSecs = dataLengthSamples / sampleRate
     sampleSpacing = 1.0/sampleRate        
