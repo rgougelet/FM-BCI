@@ -1,3 +1,17 @@
+""" 
+
+Summary: 
+    This progam is used to compare processing algorithms.
+
+    arg[1] is used to specify the number of seconds the test 
+    will run. If no command argument is supplied, then by 
+    default the progam will run for 60 seconds
+
+    Example Usage:  
+    testReceive.py 60
+
+"""
+
 import numpy as np
 from pylsl import StreamInlet, resolve_stream, vectorf, StreamInfo, StreamOutlet
 import processing as p
@@ -10,11 +24,11 @@ from time import time
 import sys
 import matplotlib.pyplot as plt
 
-
 for clearline in range(1,20):
     print('\n')
 
 # initialize data stream
+print (__doc__)
 print("Looking for an EEG stream...")
 streams = []
 while not streams:
