@@ -29,11 +29,11 @@ numOfChannel = inf.channel_count()
 
 # Initialize the recorder 
 record.delete_recordings() # delte recordings
-recordFreq = record.Recorder("_Frequency")
+recordFreq = record.Recorder("_Compare_Frequency")
 recordFreq.write("       mean             median       meanBenchMark    medianBenchMark ")
-recordAmp = record.Recorder("_Amplitude")
-recordRatio = record.Recorder("_Ratio")
-recordIndex = record.Recorder("_Index")
+# recordAmp = record.Recorder("_Amplitude")
+# recordRatio = record.Recorder("_Ratio")
+# recordIndex = record.Recorder("_Index")
 
 # Processing parameters
 dataLengthSecs = 1
