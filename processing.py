@@ -3,7 +3,9 @@ import numpy as np
 import scipy as sp
 import scipy.fftpack
 from scipy import signal
-from scipy.signal import butter, lfilter  
+from scipy.signal import butter, lfilter 
+from scipy import linalg
+from scipy.linalg import toeplitz, eig
 import matplotlib.pyplot as plt
 #from scikits.talkbox import lpc
 import time
@@ -49,6 +51,36 @@ def spect_median(voltageSamples, sampleRate, desiredFreqResolution, winLengthSam
         medianSpecMat[channelIndex,:] = medianSpectrum
         
     return medianSpecMat
+    
+def chan_music(voltageSamples,sampleRate, desiredFreqResolution):
+    rxx = np.correlate(voltageSamples,voltageSamples, 'full')
+    rxx = rxx[rxx.size/2:]
+    Rxx = linalg.toeplitz(rxx)
+    sampleSpacing = 1.0/sampleRate 
+    # z = np.vstack((voltageSamples,voltageSamples))
+    #covv = np.cov(z.T)
+    fftLengthSamples = int(sampleRate/desiredFreqResolution)
+    M = len(voltageSamples)
+    p = 6
+    eigenValues,eigenVectors = linalg.eig(Rxx)
+    idx = eigenValues.argsort()[::-1]   
+    eigenValues = eigenValues[idx]
+    eigenVectors = eigenVectors[:,idx]
+    print np.shape(eigenVectors)
+    #sum(abs(fft(d(:,0:M-2*p),fftLengthSamples)).^2,2)/(M-p)
+    #Pxx = sum(abs(np.fft.rfft(eigenVectors[:,:M-2*p],fftLengthSamples)),0)
+    Pxx = sum(abs(np.fft.rfft(eigenVectors,fftLengthSamples)),0)
+    print np.shape(Pxx)
+    freqs = np.fft.rfftfreq(fftLengthSamples,sampleSpacing)
+    fig=plt.figure(figsize=(12, 9))
+    plt.plot(freqs,Pxx)
+    plt.show()
+    #print np.shape(covv)
+    #print covv
+    #plt.imshow(covv)
+    #plt.show()
+    #print Rxx
+    
 def chan_per(voltageSamples, sampleRate):
     f, t, Sxx = signal.spectrogram(voltageSamples, sampleRate)
     plt.pcolormesh(t, f, Sxx)

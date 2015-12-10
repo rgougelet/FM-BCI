@@ -37,7 +37,7 @@ bandLow = 8                                # lower alpha band
 bandHigh = 12                             # higher alpha band
 orderFilter = 4
 voltageSamples = np.empty([numOfChannel,dataLengthSamples])
-desiredFreqResolution = 0.01
+desiredFreqResolution = 1
 winLengthSamples = 512
 overlapSamples = 256
 
@@ -63,14 +63,14 @@ while True:
         # chanPeakFreqs = np.empty([numOfChannel,])
         # chanPeakAmps = np.empty([numOfChannel,])
         # chanRatios = np.empty([numOfChannel])
-        voltageSamples = p.butter_bandpass_filter(voltageSamples,bandLow,bandHigh,sampleRate,orderFilter)
+        #voltageSamples = p.butter_bandpass_filter(voltageSamples,bandLow,bandHigh,sampleRate,orderFilter)
             
         for channelIndex in range(numOfChannel):
             
-            blah = p.chan_autocorr(voltageSamples[channelIndex,:], sampleRate, desiredFreqResolution)
- 
+            #blah = p.chan_autocorr(voltageSamples[channelIndex,:], sampleRate, desiredFreqResolution)
+            p.chan_music(voltageSamples[channelIndex,:], sampleRate, desiredFreqResolution)
             #p.chan_plot_freq(blah, desiredFreqResolution)
-            print "Channel ", channelIndex+1
+            #print "Channel ", channelIndex+1
             #plt.xlim(0,30)
             #plt.ylim(-50,0)
             #plt.show()
