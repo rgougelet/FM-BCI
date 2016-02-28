@@ -9,7 +9,6 @@ from numpy import pi
 
 
 
-
 for clearline in range(1,20):
     print('\n')
     
@@ -19,7 +18,7 @@ alphaModFreq = 0.01  # Hz the modulating frequency
 alphaFreqDev = 2    # Hz of the frequency deviation, BW is 2x this
 
 # generate data to send
-sampleRate = 1024.0
+sampleRate = 100.0
 numOfChannel = 1
 dataLengthSecs = 1
 dataLengthSamples = dataLengthSecs*sampleRate
@@ -75,15 +74,15 @@ def phaseLockedLoop(voltageSamples):
 
     for dataPoint in range(dataLengthSamples):
 
-        # phi1 = reg1 + d_phi_1;  
-        # phi1_reg[dataPoint] = phi1;   # Store the phase of signal 1
+        phi1 = reg1 + d_phi_1;  
+        phi1_reg[dataPoint] = phi1;   # Store the phase of signal 1
 
 
-        # s1 = np.exp(1j*2.0*pi*reg1); # generating the signal 1 and 2 voltage (This is the input)
-        s1 = channelVoltage[dataPoint]; # The input voltage from channel voltage
+        s1 = np.exp(1j*2.0*pi*reg1); # generating the signal 1 and 2 voltage (This is the input)
+        # s1 = channelVoltage[dataPoint]; # The input voltage from channel voltage
         s2 = np.exp(1j*2.0*pi*reg2);
 
-        # s1_reg[dataPoint] =s1;   # Store signal 1 and 2
+        s1_reg[dataPoint] =s1;   # Store signal 1 and 2
         s2_reg[dataPoint] =s2;
 
         t = s1 * s2.conj();   # Detecting the phase by multiplying two sinusoids
@@ -104,41 +103,41 @@ def phaseLockedLoop(voltageSamples):
 
     print s2_reg;
 
-    # figure(1)
-    # title('phase plot');
-    # xlabel('Samples');
-    # ylabel('Phase');
-    # plot(phi1_reg);
-    # plot(phi2_reg);
-    # grid(True);
-    # show();
+    figure(1)
+    title('phase plot');
+    xlabel('Samples');
+    ylabel('Phase');
+    plot(phi1_reg);
+    plot(phi2_reg);
+    grid(True);
+    show();
 
-    # figure(2)
-    # plot(phi_error_reg);
-    # title('phase Error of phase detector');
-    # grid(True);
-    # xlabel('samples(n)');
-    # ylabel('Phase error(degrees)');
-    # show();
+    figure(2)
+    plot(phi_error_reg);
+    title('phase Error of phase detector');
+    grid(True);
+    xlabel('samples(n)');
+    ylabel('Phase error(degrees)');
+    show();
 
-
-    # figure(3)
-    # plot(s1_reg.real);
-    # plot(s2_reg.real,'r');
-    # grid(True);
-    # title('Input signal & Output signal of VCO');
-    # xlabel('Samples');
-    # ylabel('Amplitude');
-    # show();
 
     figure(3)
-    # plot(channelVoltage);
+    plot(s1_reg.real);
     plot(s2_reg.real,'r');
     grid(True);
     title('Input signal & Output signal of VCO');
     xlabel('Samples');
     ylabel('Amplitude');
     show();
+
+    # figure(3)
+    # plot(channelVoltage);
+    # plot(s2_reg.real,'r');
+    # grid(True);
+    # title('Input signal & Output signal of VCO');
+    # xlabel('Samples');
+    # ylabel('Amplitude');
+    # show();
 
 
   
