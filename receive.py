@@ -3,7 +3,7 @@ import numpy as np
 from pylsl import StreamInlet, resolve_stream, vectorf, StreamInfo, StreamOutlet
 import processing as p
 import record
-from scikits.talkbox import lpc
+# from scikits.talkbox import lpc
 from scipy import signal
 import matplotlib.pyplot as plt
 
@@ -67,8 +67,13 @@ while True:
             
         for channelIndex in range(numOfChannel):
             
+<<<<<<< HEAD
             #blah = p.chan_autocorr(voltageSamples[channelIndex,:], sampleRate, desiredFreqResolution)
             p.chan_music(voltageSamples[channelIndex,:], sampleRate, desiredFreqResolution)
+=======
+            # blah = p.chan_autocorr(voltageSamples[channelIndex,:], sampleRate, desiredFreqResolution)
+ 
+>>>>>>> e4f33c72087e7b09fecf43fef6ab883767cd4063
             #p.chan_plot_freq(blah, desiredFreqResolution)
             #print "Channel ", channelIndex+1
             #plt.xlim(0,30)

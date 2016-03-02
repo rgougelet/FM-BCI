@@ -28,13 +28,8 @@ chanSNRs = np.linspace(1./numOfChannel,10,numOfChannel)
 #print chanSNRs
 #for channelIndex in range(numOfChannel):
 #    voltageSamples[channelIndex,:] = o.chan_fm_noisy(dataLengthSamples, sampleRate, alphaCenter, alphaModFreq, alphaFreqDev, chanSNRs[channelIndex])
-<<<<<<< HEAD
-voltageSamples[-1,:] = o.chan_sin(dataLengthSamples, sampleRate, alphaCenter)
-=======
 
 voltageSamples[-1,:] = o.chan_sin_noisy(dataLengthSamples, sampleRate, alphaCenter)
-print voltageSamples.shape
->>>>>>> e4f33c72087e7b09fecf43fef6ab883767cd4063
 #voltageSamples = o.chan_sin(dataLengthSamples, sampleRate, alphaCenter) # ground truth
 #voltageSamples = o.chan_fm(dataLengthSamples, sampleRate, alphaCenter, alphaModFreq, alphaFreqDev)
 #voltageSamples = o.chan_fm_noisy(dataLengthSamples, sampleRate, alphaCenter, alphaModFreq, alphaFreqDev)
