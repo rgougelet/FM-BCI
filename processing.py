@@ -115,16 +115,19 @@ def chan_autocorr(voltageSamples, sampleRate, desiredFreqResolution):
         
         fftLengthSamples = int(sampleRate/desiredFreqResolution)
         # lpcp, g, k = lpc(voltageSamples,minError)
-        lpcp, g, k = lpc(voltageSamples,4)
-        lpcp = np.array(lpcp)
-        rts = np.roots(lpcp)
-        rts = rts[np.imag(rts)>=0];
-        angz = np.arctan2(np.imag(rts),np.real(rts))
-        frqs = np.sort(angz*sampleRate/(2*np.pi))
-        pks = np.empty(0)
+        p = 4
+        lpcp, g, k = lpc(voltageSamples,p) # finds coefficient of pth order linear predictor that predicts the current value of the real-valued time series based on past samples
+        lpcp = np.array(lpcp) # initializes array that stores the coefficients
+        rts = np.roots(lpcp) # finds the roots of the polynomial with store coefficients
+        rts = rts[np.imag(rts)>=0]; # removes imaginary roots
+        angz = np.arctan2(np.imag(rts),np.real(rts)) # converts to angles
+        frqs = np.sort(angz*sampleRate/(2*np.pi)) # converts angles to freqs based on samplerate
+        pks = np.empty(0) # storage array for peaks of powerspectrum
+        lowerBound = 8
+        upperBound = 12
         for kk in range(len(frqs)):
-            if (frqs[kk] > 6 and frqs[kk] < 14):
-                pks = np.append(pks,frqs[kk])
+            if (frqs[kk] > 8 and frqs[kk] < 11): # finds peak in spectrum band, likely alpha
+                pks = np.append(pks,frqs[kk]) 
         peak_freq = np.mean(pks)
         #print peak_freq
         padLength = fftLengthSamples-len(lpcp)
