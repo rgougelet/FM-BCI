@@ -1,5 +1,7 @@
 import numpy as np
 import scipy as sp
+from scipy import signal
+from scipy.signal import butter, lfilter 
 import matplotlib.pyplot as plt
 import oscillation as o
 # import processing as p
@@ -7,23 +9,21 @@ import oscillation as o
 from matplotlib.pyplot import figure, title, xlabel, ylabel, plot, grid, show, axis
 
 from numpy import pi
-import lp
-
-
-
+#import lp
 
 # for clearline in range(1,20):
 #     print('\n')
 
 # frequency modulation parameters
 alphaCenter = 10   # Hz the carrier frequency
-alphaModFreq = 0.01  # Hz the modulating frequency
+alphaModFreq = 0.1  # Hz the modulating frequency
 alphaFreqDev = 2    # Hz of the frequency deviation, BW is 2x this
 
 # generate data to send
-sampleRate = 200  #this many samples per second
+sampleRate = 512  #this many samples per second
+nyq = sampleRate/2.
 numOfChannel = 1
-dataLengthSecs = 2 #samples will be collected for this many seconds
+dataLengthSecs = 5 #samples will be collected for this many seconds
 dataLengthSamples = dataLengthSecs*sampleRate #this is the total number of samples collected
 # voltageSamples = np.empty([numOfChannel,dataLengthSamples])
 # chanSNRs = np.linspace(1./numOfChannel,10,numOfChannel)
@@ -34,7 +34,8 @@ dataLengthSamples = dataLengthSecs*sampleRate #this is the total number of sampl
 #for channelIndex in range(numOfChannel):
 #    voltageSamples[channelIndex,:] = o.chan_fm_noisy(dataLengthSamples, sampleRate, alphaCenter, alphaModFreq, alphaFreqDev, chanSNRs[channelIndex])
 
-channelVoltage = o.chan_sin(dataLengthSamples, sampleRate, 10)
+#channelVoltage = o.chan_sin(dataLengthSamples, sampleRate, 10)
+channelVoltage = o.chan_fm(dataLengthSamples, sampleRate, alphaCenter, alphaModFreq, alphaFreqDev)
 #channelVoltage2 = o.chan_cos(dataLengthSamples, sampleRate, 11)
 
 # reference = o.chan_sin(dataLengthSamples, sampleRate, 10)
@@ -51,67 +52,57 @@ channelVoltage = o.chan_sin(dataLengthSamples, sampleRate, 10)
 #mult_array = np.zeros(dataLengthSamples)
 uf = np.zeros(dataLengthSamples)
 ud = np.zeros(dataLengthSamples)
+udd = np.zeros(dataLengthSamples)
 phi2 = np.zeros(dataLengthSamples)
 phi3 = np.zeros(dataLengthSamples)
 uout = np.zeros(dataLengthSamples)
 ufb = np.zeros(dataLengthSamples)
+order = 8
+figure(1)
+b, a = sp.signal.butter(order, alphaCenter/nyq, btype='low')
+w,h = signal.freqz(b,a)
+plt.plot(w,20 * np.log10(abs(h)), 'b')
+plt.ylabel('Amplitude [dB]', color='b')
+plt.xlabel('Frequency [rad/sample]')
+print 'b=',b
+print 'a=',a
+print len(a),len(b)
+chunkSize = order+1
 
-for sampleInd in range(dataLengthSamples-1):
-    #t += t_step
-    #ref = np.sin(f_phi * 2 * pi * t)
+for sampleInd in range(chunkSize,dataLengthSamples-1):
     uin = channelVoltage
     ud[sampleInd] = uin[sampleInd]*ufb[sampleInd]
-    #v = channelVoltage[sampleInd]
-    #multiplied = ref * v
-    # diff = np.abs(prev_mult - multiplied)
-    # if (diff < prev_diff):
-    #     f_step = f_step/10.
-    # else:
-    #     f_step = f_step*10.
-    b0 = 0.073
-    b1 = 0.073
-    a1 = -0.8541
-    uf[sampleInd] = (b0*ud[sampleInd]+b1*(ud[sampleInd - 1])-a1*uf[sampleInd - 1])
-    w0 = 10*2*np.pi
+    #udd[sampleInd] = uin[sampleInd]*ufb[sampleInd]
+    
+    ud_chunk = ud[sampleInd:sampleInd-chunkSize:-1]
+    uf_chunk = uf[sampleInd-1:sampleInd-chunkSize:-1]
+    fud_chunk = np.dot(b,ud_chunk)
+    fuf_chunk = np.dot(a[1:],uf_chunk)
+    uf[sampleInd] = fud_chunk-fuf_chunk
+    
+    #ud2_chunk = uf[sampleInd:sampleInd-chunkSize:-1]
+    #uff_chunk = uf[sampleInd-1:sampleInd-chunkSize:-1]
+    
+    #uf[sampleInd] = (b0*ud[sampleInd]+b1*(ud[sampleInd - 1])-a1*uf[sampleInd - 1]) #lowpass filter
+    w0 = 5*2*np.pi
     Ts = 1./sampleRate
-    phi2[sampleInd+1]=phi2[sampleInd]+w0*Ts+uf[sampleInd]
-    phi3[sampleInd+1]=phi3[sampleInd]+w0*Ts+uf[sampleInd]
+    phi2[sampleInd+1]=phi2[sampleInd]+w0*Ts+uf[sampleInd] #wrapped phase
+    phi3[sampleInd+1]=phi3[sampleInd]+w0*Ts+uf[sampleInd] #unwrapped phase
 
     if (phi2[sampleInd+1]>np.pi):
         phi2[sampleInd+1] = (phi2[sampleInd+1]-(2*np.pi))
 
     uout[sampleInd+1]=np.sin(phi2[sampleInd+1])
 
-    Kn = 1
+    Kn = 0.0001
     ufb[sampleInd+1]=np.sin(Kn*phi2[sampleInd+1])
-#print(uout)
 
-    """if (multiplied > 0):
-        if (multiplied > 0.99):
-            pass
-        elif (multiplied < prev_mult):
-            f_phi += f_step
-        else:
-            f_phi -= f_step
-
-
-    ref_array[sampleInd] = ref
-    mult_array[sampleInd] = multiplied
-    prev_mult = multiplied"""
-    # prev_diff = diff
-    # print v, ref
-    # print diff
-
-
-
-# mult = channelVoltage * channelVoltage2
-#
-# test = lp.low_pass(mult)
-
-
-figure(1)
-plot(phi2, 'b')
+figure(2)
 plot(uin, 'r')
+#plot(uin*uin, 'g')
+#plot(ud, 'b')
+plot(uout, 'g')
+#plot(uf, 'g')
 # # plot(channelVoltage,'r')
 # # plot(channelVoltage2,'g')
 # # plot(multiplied, 'g')
