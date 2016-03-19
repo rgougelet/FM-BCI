@@ -15,15 +15,15 @@ from numpy import pi
 #     print('\n')
 
 # frequency modulation parameters
-alphaCenter = 10   # Hz the carrier frequency
-alphaModFreq = 0.1  # Hz the modulating frequency
+alphaCenter = 20   # Hz the carrier frequency
+alphaModFreq = 10  # Hz the modulating frequency
 alphaFreqDev = 2    # Hz of the frequency deviation, BW is 2x this
 
 # generate data to send
 sampleRate = 512  #this many samples per second
 nyq = sampleRate/2.
 numOfChannel = 1
-dataLengthSecs = 5 #samples will be collected for this many seconds
+dataLengthSecs = 20 #samples will be collected for this many seconds
 dataLengthSamples = dataLengthSecs*sampleRate #this is the total number of samples collected
 # voltageSamples = np.empty([numOfChannel,dataLengthSamples])
 # chanSNRs = np.linspace(1./numOfChannel,10,numOfChannel)
@@ -34,8 +34,9 @@ dataLengthSamples = dataLengthSecs*sampleRate #this is the total number of sampl
 #for channelIndex in range(numOfChannel):
 #    voltageSamples[channelIndex,:] = o.chan_fm_noisy(dataLengthSamples, sampleRate, alphaCenter, alphaModFreq, alphaFreqDev, chanSNRs[channelIndex])
 
-#channelVoltage = o.chan_sin(dataLengthSamples, sampleRate, 10)
+#channelVoltage = o.chan_sin(dataLengthSamples, sampleRate, alphaCenter)
 channelVoltage = o.chan_fm(dataLengthSamples, sampleRate, alphaCenter, alphaModFreq, alphaFreqDev)
+actual_freq = o.chan_fm_freq(dataLengthSamples, sampleRate, alphaCenter, alphaModFreq, alphaFreqDev)
 #channelVoltage2 = o.chan_cos(dataLengthSamples, sampleRate, 11)
 
 # reference = o.chan_sin(dataLengthSamples, sampleRate, 10)
@@ -53,64 +54,97 @@ channelVoltage = o.chan_fm(dataLengthSamples, sampleRate, alphaCenter, alphaModF
 uf = np.zeros(dataLengthSamples)
 ud = np.zeros(dataLengthSamples)
 udd = np.zeros(dataLengthSamples)
-phi2 = np.zeros(dataLengthSamples)
-phi3 = np.zeros(dataLengthSamples)
+phi = np.zeros(dataLengthSamples)
 uout = np.zeros(dataLengthSamples)
 ufb = np.zeros(dataLengthSamples)
-order = 8
-figure(1)
-b, a = sp.signal.butter(order, alphaCenter/nyq, btype='low')
+order = 12
+#figure(1)
+b, a = sp.signal.butter(order, 15/nyq, btype='low')
 w,h = signal.freqz(b,a)
-plt.plot(w,20 * np.log10(abs(h)), 'b')
-plt.ylabel('Amplitude [dB]', color='b')
-plt.xlabel('Frequency [rad/sample]')
-print 'b=',b
-print 'a=',a
-print len(a),len(b)
+#delaysamples = 0.5*(len(b) - 1.) # in samples
+#delaysecs = delaysamples/sampleRate
+#padlength = round(delaysamples)
+#plt.plot(w,20 * np.log10(abs(h)), 'b')
+#plt.ylabel('Amplitude [dB]', color='b')
+#plt.xlabel('Frequency [rad/sample]')
+print 'b=',b, ' len=',len(b)
+print 'a=',a, ' len=',len(a)
 chunkSize = order+1
 
-for sampleInd in range(chunkSize,dataLengthSamples-1):
-    uin = channelVoltage
-    ud[sampleInd] = uin[sampleInd]*ufb[sampleInd]
-    #udd[sampleInd] = uin[sampleInd]*ufb[sampleInd]
+for sampleInd in range(chunkSize+1,dataLengthSamples-1):
+#for sampleInd in range(1,dataLengthSamples-1):
+    uin = channelVoltage # signal
+    ud[sampleInd] = uin[sampleInd]*ufb[sampleInd] # phase difference of reference vs. signal
+   
+    fac = 1
+    ud_chunk = ud[sampleInd:sampleInd-chunkSize:-1] # chunk of unfiltered phase difference
+    uf_chunk = uf[sampleInd-1:sampleInd-chunkSize:-1] # chunk of filtered phase difference
+    fud_chunk = np.dot(b,ud_chunk) # convolve b coeffs with currenta and prev unfiltered data
+    fuf_chunk = np.dot(a[1:],uf_chunk) # convolve a coeffs with prev filtered data
+    uf[sampleInd] = (fud_chunk-fuf_chunk)/fac # identify current filtered sample
     
-    ud_chunk = ud[sampleInd:sampleInd-chunkSize:-1]
-    uf_chunk = uf[sampleInd-1:sampleInd-chunkSize:-1]
-    fud_chunk = np.dot(b,ud_chunk)
-    fuf_chunk = np.dot(a[1:],uf_chunk)
-    uf[sampleInd] = fud_chunk-fuf_chunk
-    
-    #ud2_chunk = uf[sampleInd:sampleInd-chunkSize:-1]
-    #uff_chunk = uf[sampleInd-1:sampleInd-chunkSize:-1]
-    
-    #uf[sampleInd] = (b0*ud[sampleInd]+b1*(ud[sampleInd - 1])-a1*uf[sampleInd - 1]) #lowpass filter
-    w0 = 5*2*np.pi
+    # TODO: apply filter forward and backward
+
+    #uf[sampleInd] = (b[0]*ud[sampleInd]+b[1]*(ud[sampleInd - 1])-a[1]*uf[sampleInd - 1]) #lowpass filter
+    w0 = 20*2*np.pi
     Ts = 1./sampleRate
-    phi2[sampleInd+1]=phi2[sampleInd]+w0*Ts+uf[sampleInd] #wrapped phase
-    phi3[sampleInd+1]=phi3[sampleInd]+w0*Ts+uf[sampleInd] #unwrapped phase
+    fac = 1
+    
+    phi[sampleInd+1]=phi[sampleInd]+w0*Ts+uf[sampleInd] # phase of signal controlled oscillator (SCO)
+    
+    if(phi[sampleInd+1]>np.pi):
+        phi[sampleInd+1] = (phi[sampleInd+1]-(2*np.pi))
 
-    if (phi2[sampleInd+1]>np.pi):
-        phi2[sampleInd+1] = (phi2[sampleInd+1]-(2*np.pi))
+    # Store SCO
+    uout[sampleInd+1]=np.sin(phi[sampleInd+1])
 
-    uout[sampleInd+1]=np.sin(phi2[sampleInd+1])
+    # Feedback
+    Uf = 0.05
+    Kn = 1
+    ufb[sampleInd+1]=Uf*np.sin(Kn*phi[sampleInd+1])
 
-    Kn = 0.0001
-    ufb[sampleInd+1]=np.sin(Kn*phi2[sampleInd+1])
-
+# Input
+figure(1)
+plot(uf/(w0*Ts))
+plot((actual_freq-np.mean(actual_freq))/100)
+    
+# Phase differences
 figure(2)
-plot(uin, 'r')
-#plot(uin*uin, 'g')
-#plot(ud, 'b')
-plot(uout, 'g')
-#plot(uf, 'g')
-# # plot(channelVoltage,'r')
-# # plot(channelVoltage2,'g')
-# # plot(multiplied, 'g')
-# # plot(filter_multiplied, 'k')
-grid(True)
-#
-show()
+plot(uin)
+plot(ud, 'g') # unfiltered phase difference
+plot(uf, 'r') # filtered phase difference
+title('Phase difference')
 
+# FFT of phase diff
+figure(3)
+f,psd_ud = sp.signal.welch(ud, fs=sampleRate, window='hanning', nperseg=1024., nfft=2048, detrend='linear', return_onesided=True, scaling='density')
+f,psd_uf = sp.signal.welch(uf, fs=sampleRate, window='hanning', nperseg=1024., nfft=2048, detrend='linear', return_onesided=True, scaling='density')
+plot(f,psd_ud, 'b')
+plot(f,psd_uf, 'r')
+
+# Test SCO vs Signal
+figure(4)
+plot(uin)
+plot(uout, 'r')
+title('SCO vs Signal')
+
+# Test SCO vs Signal
+figure(5)
+plot(uin-uout)
+title('SCO minus Signal')
+
+# Phase
+figure(6)
+plot(phi)
+title('Phase of SCO')
+
+# Feedback
+figure(7)
+plot(ufb)
+title('SCO')
+
+grid(True)
+show()
 
 # figure(3)
 # plot(mult_array)
