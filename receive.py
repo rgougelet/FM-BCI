@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import numpy as np
 #from numpy import fft
 from pylsl import StreamInlet, resolve_stream, vectorf, StreamInfo, StreamOutlet
@@ -16,12 +17,29 @@ print("Looking for an EEG stream...")
 streams = []
 while not streams:
     streams = resolve_stream('name', 'SimulatedEEG')
+=======
+import platform
+import numpy as np
+import sys
+sys.path.insert(0, './pylsl')
+from pylsl import StreamInlet, resolve_stream, vectorf
+import processing as p
+import record
+
+for clearline in range(1,100):
+    print('\n')
+
+# initialize data stream
+print("looking for an EEG stream...")
+streams = resolve_stream('name', 'SimulatedEEG')
+>>>>>>> e86d00ecee6bb251e52daf833525f0da615d2865
 inlet = StreamInlet(streams[0])
 
 # Extract stream info
 inf = inlet.info()
 sampleRate = inf.nominal_srate()
 numOfChannel = inf.channel_count()
+<<<<<<< HEAD
 #sample = pylsl.vectorf()
 
 # Initialize the recorder 
@@ -29,11 +47,18 @@ recordFreq = record.Recorder("_Frequency")
 recordAmp = record.Recorder("_Amplitude")
 recordRatio = record.Recorder("_Ratio")
 recordIndex = record.Recorder("_Index")
+=======
+sample = vectorf()
+
+# Initialize the recorder 
+recorder = record.Recorder()
+>>>>>>> e86d00ecee6bb251e52daf833525f0da615d2865
 
 # Processing parameters
 dataLengthSecs = 1
 dataLengthSamples = int(dataLengthSecs * sampleRate)
 bandLow = 8                                # lower alpha band 
+<<<<<<< HEAD
 bandHigh = 12                             # higher alpha band
 orderFilter = 4
 voltageSamples = np.empty([numOfChannel,dataLengthSamples])
@@ -113,3 +138,53 @@ while True:
         # recordIndex.write(output)
 
         sampleIndex = 0 # restart new store
+=======
+bandHigh = 12                              # higher alpha band
+orderFilter = 4
+voltageSamples = np.empty([numOfChannel,dataLengthSamples])
+desiredFreqResolution = 0.1
+winLengthSamples = 512
+overlapSamples = 256
+
+try:
+    print("Collecting data in "+str(dataLengthSecs)+" second chunks.")
+    sampleIndex = 0
+    peak_alpha_freqs = np.zeros([numOfChannel,0]) # grows with every chunk and stores peaks for each channel
+    while True:
+    
+        # populating the samples
+        sample, timestamp = inlet.pull_sample()
+        voltageSamples[:, sampleIndex] = sample
+        sampleIndex += 1
+
+        # process data chunk
+        if sampleIndex == dataLengthSamples:
+            voltageSamples = p.butter_bandpass_filter(voltageSamples,bandLow,bandHigh,sampleRate,orderFilter)
+            peak_alpha_freq = np.empty([numOfChannel,])
+            for channelIndex in range(numOfChannel):
+                medianSpectrum = p.chan_spect_median(voltageSamples[channelIndex,:], sampleRate, desiredFreqResolution, winLengthSamples, overlapSamples)
+                medianPeak = p.chan_peak_freq(medianSpectrum, desiredFreqResolution)
+
+                peak_alpha_freq[channelIndex] = medianPeak
+                
+                peak_alpha_freqs = np.c_[peak_alpha_freqs, peak_alpha_freq] # append to storage array
+            print peak_alpha_freq
+            sampleIndex = 0 # restart new chunk
+
+        # equivalent of Keyboard inturrpt on Windows
+        if platform.system() == "Windows":
+            import msvcrt
+            if msvcrt.kbhit():
+                if ord(msvcrt.getch()) == 'q':
+                    # Write to file before exit
+                    output_to_file_before_exit()
+                    exit()
+
+except KeyboardInterrupt:
+    # Write to file before exit
+    print 'Saved Data:'
+    print peak_alpha_freqs
+    recorder.record_raw(peak_alpha_freqs.transpose())
+    raise
+
+>>>>>>> e86d00ecee6bb251e52daf833525f0da615d2865

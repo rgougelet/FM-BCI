@@ -3,6 +3,7 @@ from pylsl import StreamInfo, StreamOutlet, vectorf
 import oscillation as o
 import processing as p
 import numpy as np
+<<<<<<< HEAD
 import random
 import matplotlib.pyplot as plt
 import math
@@ -40,6 +41,26 @@ print voltageSamples.shape
 #voltageSamples = o.chan_fm_noisy(dataLengthSamples, sampleRate, alphaCenter, alphaModFreq, alphaFreqDev)
     # voltageSamples[channelIndex,:] = o.chan_sin(dataLengthSamples, sampleRate, 10, chanSNRs[channelIndex])
 # voltageSamples[7,:] = o.chan_sin(dataLengthSamples, sampleRate, alphaCenter, alphaModFreq, alphaFreqDev) # ground truth
+=======
+
+for clearline in range(1,100):
+    print('\n')
+    
+# frequency modulation parameters
+alphaCenter = 10.25   # Hz the carrier frequency
+alphaModFreq = 0.1  # Hz the modulating frequency
+alphaFreqDev = 1    # Hz of the frequency deviation
+
+# generate data to send
+sampleRate = 1024.0
+numOfChannel = 8
+dataLengthSecs = 300
+dataLengthSamples = dataLengthSecs*sampleRate
+voltageSamples = np.empty([numOfChannel,dataLengthSamples])
+for channelIndex in range(0,numOfChannel):
+    voltageSamples[channelIndex,:] = o.fm_noisy(dataLengthSamples, sampleRate, alphaCenter, alphaModFreq, alphaFreqDev)
+voltageSamples[channelIndex,:] = o.fm(dataLengthSamples, sampleRate, alphaCenter, alphaModFreq, alphaFreqDev) # ground truth
+>>>>>>> e86d00ecee6bb251e52daf833525f0da615d2865
 
 # create outlet for output
 info = StreamInfo('SimulatedEEG', 'EEG', numOfChannel, sampleRate, 'float32', 'myuid34234')

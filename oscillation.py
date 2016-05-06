@@ -1,7 +1,11 @@
 import scipy as sp
 import numpy as np
 
+<<<<<<< HEAD
 def chan_fm_noisy(dataLengthSamples, sampleRate, oscCenter, oscModFreq, oscFreqDev, snr = 5, oscMean = 0, noiseMean = 0, noiseStdDev = 0.5, samplingNoiseAmp = 0.5): 
+=======
+def fm_noisy(dataLengthSamples, sampleRate, oscCenter, oscModFreq, oscFreqDev, oscMean = 0, snr = 5, noiseMean = 0, noiseStdDev = 0.5, samplingNoiseAmp = 0.5): 
+>>>>>>> e86d00ecee6bb251e52daf833525f0da615d2865
     sampleSpacing = 1.0 / sampleRate
     dataLengthSecs = dataLengthSamples/sampleRate
     t = np.arange(0,dataLengthSecs,sampleSpacing)      
@@ -16,18 +20,27 @@ def chan_fm_noisy(dataLengthSamples, sampleRate, oscCenter, oscModFreq, oscFreqD
     pinkNoise = np.cumsum(normalNoise)
     
     # Frequency modulated oscillation, a sinusoidal baseband signal
+<<<<<<< HEAD
     osc = oscAmp*np.cos( oscCenter  * 2.0 * np.pi * t + oscFreqDev*np.cos(2 * np.pi * oscModFreq * t) / oscModFreq)
+=======
+    osc = oscAmp*np.sin( oscCenter  * 2.0 * np.pi * t + oscFreqDev*np.sin(2 * np.pi * oscModFreq * t) / oscModFreq)
+>>>>>>> e86d00ecee6bb251e52daf833525f0da615d2865
 
     # Oscillation + 1/f noise + additional random noise
     voltageSamples = osc + pinkNoise + samplingNoiseAmp * np.random.random([1,dataLengthSamples])  
     voltageSamples = np.reshape(voltageSamples, ((dataLengthSamples,)))
     return voltageSamples
 
+<<<<<<< HEAD
 def chan_fm(dataLengthSamples, sampleRate, oscCenter, oscModFreq, oscFreqDev, oscAmp = 1): 
+=======
+def fm(dataLengthSamples, sampleRate, oscCenter, oscModFreq, oscFreqDev, oscAmp = 1): 
+>>>>>>> e86d00ecee6bb251e52daf833525f0da615d2865
     sampleSpacing = 1.0 / sampleRate
     dataLengthSecs = dataLengthSamples/sampleRate
     t = np.arange(0,dataLengthSecs,sampleSpacing)      
     h = oscFreqDev/oscModFreq # Modulation index, < 1 narrowband, > 1 wideband
+<<<<<<< HEAD
     fc = oscCenter  * 2.0 * np.pi * t
     fm = (oscFreqDev*np.cos(2 * np.pi * oscModFreq * t) / oscModFreq)
     osc = oscAmp*np.cos(fc + fm)
@@ -60,6 +73,13 @@ def chan_fm_freq(dataLengthSamples, sampleRate, oscCenter, oscModFreq, oscFreqDe
     return instFreq
     
 def chan_sin_noisy(dataLengthSamples, sampleRate, oscCenter, snr = 5, oscMean = 0, noiseMean = 0, noiseStdDev = 0.5, samplingNoiseAmp = 0.5): 
+=======
+    osc = oscAmp*np.sin( oscCenter  * 2.0 * np.pi * t + oscFreqDev*np.sin(2 * np.pi * oscModFreq * t) / oscModFreq)
+    voltageSamples = np.reshape(osc, ((dataLengthSamples,)))
+    return voltageSamples
+
+def sin_noisy(dataLengthSamples, sampleRate, oscCenter, oscMean = 0, snr = 5, noiseMean = 0, noiseStdDev = 0.5, samplingNoiseAmp = 0.5): 
+>>>>>>> e86d00ecee6bb251e52daf833525f0da615d2865
     sampleSpacing = 1.0 / sampleRate
     dataLengthSecs = dataLengthSamples/sampleRate
     t = np.arange(0,dataLengthSecs,sampleSpacing)      
@@ -81,6 +101,7 @@ def chan_sin_noisy(dataLengthSamples, sampleRate, oscCenter, snr = 5, oscMean = 
     
     return voltageSamples
 
+<<<<<<< HEAD
 
 def chan_sin(dataLengthSamples, sampleRate, oscCenter, oscAmp = 1): 
     sampleSpacing = 1.0 / sampleRate
@@ -182,5 +203,18 @@ def sin(dataShape, sampleRate, oscCenter, oscAmp = 1):
     return voltageChunk
 
 
+=======
+def sin(dataLengthSamples, sampleRate, oscCenter, oscAmp = 1): 
+    sampleSpacing = 1.0 / sampleRate
+    dataLengthSecs = dataLengthSamples/sampleRate
+    t = np.arange(0,dataLengthSecs,sampleSpacing)      
+    osc = oscAmp * np.sin(oscCenter * 2.0 * np.pi * t)
+    voltageSamples = np.reshape(osc, ((dataLengthSamples,)))
+    return voltageSamples
+
+def make_chunk_of_channelXsample_data():
+    return
+    
+>>>>>>> e86d00ecee6bb251e52daf833525f0da615d2865
 def make_chunk_of_channelXsample_data_with_spatially_distributed_oscillation():
     return
