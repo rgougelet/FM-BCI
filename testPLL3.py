@@ -5,9 +5,7 @@ from scipy.signal import butter, lfilter
 import matplotlib.pyplot as plt
 import oscillation as o
 # import processing as p
-
 from matplotlib.pyplot import figure, title, xlabel, ylabel, plot, grid, show, axis
-
 from numpy import pi
 #import lp
 
@@ -25,32 +23,11 @@ nyq = sampleRate/2.
 numOfChannel = 1
 dataLengthSecs = 20 #samples will be collected for this many seconds
 dataLengthSamples = dataLengthSecs*sampleRate #this is the total number of samples collected
-# voltageSamples = np.empty([numOfChannel,dataLengthSamples])
-# chanSNRs = np.linspace(1./numOfChannel,10,numOfChannel)
-
-
-#np.random.shuffle(chanSNRs)
-#print chanSNRs
-#for channelIndex in range(numOfChannel):
-#    voltageSamples[channelIndex,:] = o.chan_fm_noisy(dataLengthSamples, sampleRate, alphaCenter, alphaModFreq, alphaFreqDev, chanSNRs[channelIndex])
 
 #channelVoltage = o.chan_sin(dataLengthSamples, sampleRate, alphaCenter)
 channelVoltage = o.chan_fm(dataLengthSamples, sampleRate, alphaCenter, alphaModFreq, alphaFreqDev)
 actual_freq = o.chan_fm_freq(dataLengthSamples, sampleRate, alphaCenter, alphaModFreq, alphaFreqDev)
-#channelVoltage2 = o.chan_cos(dataLengthSamples, sampleRate, 11)
 
-# reference = o.chan_sin(dataLengthSamples, sampleRate, 10)
-# filter_multiplied = p.butter_bandpass_filter(multiplied, 0, 10, sampleRate, order=4)
-#f_phi = 10.0
-#f_step = 0.01
-#t = 0.0
-#prev_t = 0.0
-#prev_mult = 0
-#t_step = 1.0/sampleRate
-#ref = 0
-#ref_array = np.zeros(dataLengthSamples)
-#prev_diff = 10
-#mult_array = np.zeros(dataLengthSamples)
 uf = np.zeros(dataLengthSamples)
 ud = np.zeros(dataLengthSamples)
 udd = np.zeros(dataLengthSamples)

@@ -1,0 +1,29 @@
+Demonstrate that if the frequency resolution of a Fast/Discrete Fourier Transform is 0.01 Hz, and the maximum frequency of interest in the signal is 14 Hz and that the Nyquist frequency is equal to this maximum frequency, then the minimum number of samples of the signal that are needed is 2800. See equations below to clarify:
+
+
+Given, Samplerate = Number of Points / Number of Seconds
+From 1, Number of Points = Number of Seconds * Samplerate
+Given, Nyquist Freq = Samplerate / 2
+From 1 & 3, Nyquist Freq = Number of Points / (Number of Samples * 2)
+Given, for DFT, Number of Freq Bins = Number of Points / 2
+Given, for DFT, Freq Resolution = Nyquist Freq / Number of Freq Bins
+From 5 & 6, Freq Resolution = Nyquist Freq * 2 / Number of Points
+From 7 & 2, Freq Resolution = Nyquist Freq * 2 / (Number of Seconds * Samplerate)
+Assume the Nyquist Frequency is minimized at the maximum frequency of interest in a signal, ergo Nyquist Freq = Max Freq
+Assume, Max Freq = Nyquist Freq = 14
+Error => If Nyquist Freq = 14, then Samplerate = 28
+Assume, Target Freq Resolution = 0.01 Hz
+From 8, 10, & 11, 0.01 = 14*2 / Number of Points. (In general, the number of points can be increased via interpolation.)
+From 12, Number of Points = 28 / 0.01 = 2800
+From 13 & 2, 2800 = Number of Seconds * Samplerate
+Code up in Python or MATLAB a demonstration of this. One way might be to show that a sin wave is perfectly reconstructed with 0.01 Hz precision by using the Fast/Discrete Fourier Transform and then Inverse Fast/Discrete Fourier Transform, but there may be other ways. This reflects the fundamental trade-off between knowing frequency vs. time information of a signal.
+
+
+Confidence is from 0 to 1
+
+Confidence = Number of Points of Actual Signal - Number of Padded Zeros / Number of Points
+
+
+Freq Resolution = Samplerate / Number of Points
+
+0.01 = 64 / Number of Points
