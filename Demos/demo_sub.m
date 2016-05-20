@@ -8,7 +8,7 @@
 % here y=unit variance white noise + .5*sin(.1*t+phi1) + sin(.15*t+phi2)
 clear all, close all
 
-nsecs = 2;
+nsecs = 10;
 fs=2048;
 nyq = fs/2;
 mag0=1;mag1=1; hz1=10.52; mag2=1; hz2=10.54;

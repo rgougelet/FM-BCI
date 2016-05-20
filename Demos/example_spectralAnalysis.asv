@@ -44,11 +44,9 @@ omega_ss=sort(omega_ss);omega_ss=omega_ss(end-1:end)
 o1_error = omega_ss(1)-o1;
 o2_error = omega_ss(2)-o2;
 ss = o1_error^2 + o2_error^2;
-mse = ss/2;
 
 end
 %parameter space search
-% for neigs = 1:1000 (may be not so big) & eigv_mag = 0:1:0.01 at a fixed freq difference between the two
+% for neigs = 1:1000 & eigv_mag = 0:1:0.01 at a fixed freq difference between the two
 % sinusoids, what is the o1 and o2 error. also try and see what theta_mid
-% should be, i.e. midpoint between them, or the diff. use try catch, if
-% error make mse some fixed value that doesn't disturb the plot
+% should be, i.e. midpoint between them, or the diff
