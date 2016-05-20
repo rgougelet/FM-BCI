@@ -18,9 +18,8 @@ subplot(3,1,1), plot(o1,o2,'rx','MarkerSize',12),  hold on,
 subplot(3,1,2), plot(o1,o2,'rx','MarkerSize',12),  hold on,
 subplot(3,1,3), plot(o1,o2,'rx','MarkerSize',12),  hold on,
 
-
 % simulating the time series and determining the frequencies of the two
-% sinusoids.
+% sinusoids. 
 IS_count=0;
 MUSIC_count=0;
 ESPRIT_count=0;
