@@ -54,40 +54,23 @@ end
 % should be, i.e. midpoint between them, or the diff. use try catch, if
 % error make mse some fixed value that doesn't disturb the plot
 
-% clear, close all
+clear, close all
 
 
 % neigs = 20;
 % eigv_mag = 0.99;
 
-output = [];
-output2 = [];
-
+output = zeros(, 5);
 eigv_mag_step = 0:0.01:0.99
-
-% Independent:
 % neigs: lowerbound - 4, upper bound 134
 % eigv_mag: lowerbound - 0, upper bound .99
-
-% Run together in a nested for loop
-% Start: neigs - 4, eigv_mag - 0.01
-
-
-% Error Gap 1: neigs - 62  eigv_mag - 0.97
-
 for neigs_index = 4:134
     neigs_index
     for i = 1:99
-        eigv_mag_index = eigv_mag_step(i);
+        eigv_mag_index = eigv_mag_step(i)
         [e1, e2, mse] = ErrorTest(neigs_index, eigv_mag_index);
-        output(end+1,:) = [neigs_index , eigv_mag_index, e1, e2, mse];
+        output(i,:) = [neigs_index , eigv_mag_index, e1, e2, mse];
     end
 end
-
-
-% [M_output1,I_output2] = min(output(:,5))
-% Output: M_output1 = 2.8137e-14, I_output2 = 1779
-% output(1779,:)
-% Output the smallest row: 21.0000    0.9500   -0.0000    0.0000    0.0000
 
 
