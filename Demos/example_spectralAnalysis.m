@@ -62,25 +62,37 @@ end
 
 output = [];
 output2 = [];
+output3 = [];
 
 eigv_mag_step = 0:0.01:0.99
 
-% Independent:
+% Summaries:
+%
+%=== Independent:
 % neigs: lowerbound - 4, upper bound 134
 % eigv_mag: lowerbound - 0, upper bound .99
+%
+%=== Run together in a nested for loop:
+%
+% Start Range: neigs - 4, eigv_mag - 0.01
+%   Output: M_output1 = 2.8137e-14 (min value for mse)
+%           I_output2 = 1779       (min value index)  
+%   Output the smallest row: 21.0000    0.9500   -0.0000    0.0000    0.0000
+% Error1 at: neigs - 62  eigv_mag - 0.97
+%   M_output1 = 4.8825e-11
+%   I_output2 = 62
+% Error2 at: neigs - 63  eigv_mag - 0.96
+%   M_output1 = 4.8825e-11
+%   I_output2 = 62
+% Error3 at: neigs - 67  eigv_mag - 0.95
 
-% Run together in a nested for loop
-% Start: neigs - 4, eigv_mag - 0.01
 
-
-% Error Gap 1: neigs - 62  eigv_mag - 0.97
-
-for neigs_index = 4:134
+for neigs_index = 64:134
     neigs_index
     for i = 1:99
         eigv_mag_index = eigv_mag_step(i);
         [e1, e2, mse] = ErrorTest(neigs_index, eigv_mag_index);
-        output(end+1,:) = [neigs_index , eigv_mag_index, e1, e2, mse];
+        output3(end+1,:) = [neigs_index , eigv_mag_index, e1, e2, mse];
     end
 end
 
