@@ -8,7 +8,7 @@
 % here y=unit variance white noise + .5*sin(.1*t+phi1) + sin(.15*t+phi2)
 clear all, close all
 
-nsecs = 2;
+nsecs = 10;
 fs=2048;
 nyq = fs/2;
 mag0=1;
@@ -50,7 +50,7 @@ for i=1:10,
     maxthresh1 = o1+diff;
     minthresh2 = o2-diff;
     maxthresh2 = o2+diff;
-    thetamid=o1+diff/2; [Ah,bh]=cjordan([4],[0.90*exp(thetamid*j)]);
+    thetamid=o1+diff/2; [Ah,bh]=cjordan([5],[0.7*exp(thetamid*j)]);
 
     P=dlsim_complex(Ah,bh,y');
 
