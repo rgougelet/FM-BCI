@@ -36,7 +36,7 @@ for i=1:10
     
     [omega_ss,residues_ss]=sm(P,Ah,bh,n);
     omega_ss=omega_ss(omega_ss<pi);
-    omega_ss=sort(omega_ss);omega_ss=omega_ss(end-1:end)
+    omega_ss=sort(omega_ss);omega_ss=omega_ss(end-1:end);
     
     
     
