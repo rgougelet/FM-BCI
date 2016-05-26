@@ -11,7 +11,9 @@ clear all, close all
 nsecs = 2;
 fs=2048;
 nyq = fs/2;
-mag0=1;mag1=1; hz1=10.52; mag2=1; hz2=10.54;
+mag0=1;
+mag1=1; hz1=10.52; 
+mag2=1; hz2=10.54;
 o1 = 2*pi*hz1/nyq;
 o2 = 2*pi*hz2/nyq;
 x = linspace(0,nsecs, fs*nsecs);
