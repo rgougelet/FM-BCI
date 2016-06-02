@@ -64,3 +64,32 @@ c = uicontrol;
 % ylabel('eigv\_mag')
 % zlabel('mse')
 % hold on
+
+
+%% Plot of N vs n vs MSE with fixed minimal neigs and eign_mag
+% minimum MSE occurs at neigs = 21, eign_mag = 0.95, MSE = [2.81370667385737e-14]
+
+min_neigs = 21;
+min_eign_mag = 0.95;
+
+w = warning ('off','all');
+
+output_4 = [];
+for N = 200:100:20000
+    for n = 2:20
+        try
+            [e1, e2, mse] = ErrorTest(N, n, min_neigs, min_eign_mag);
+            output_4(end+1,:) = [N , n, mse];
+        catch
+             N, n
+            output_4(end+1,:) = [N , n, -1];
+        end
+%         output_4(end+1,:) = [N , n, mse];
+    end
+end
+
+
+% Most optimal: N = 18200, n = 4,mse = 1.22996188683398e-14
+% That means we did better!!!
+
+
