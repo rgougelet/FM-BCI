@@ -102,37 +102,53 @@ end
 warning ('off','all');
 
 
-optimal_pair = [];
-
-% Get the top 10 optimal pair
-for i = 1:10
-    [M_output1,I_output2] = min(output(:,5));
-    optimal_pair(end+1, :) = output(I_output2,:);
-    output(I_output2, 5) = 1e8;
-end
-
+% optimal_pair = [];
+%
+% % Get the top 10 optimal pair
+% for i = 1:10
+%     [M_output1,I_output2] = min(output(:,5));
+%     optimal_pair(end+1, :) = output(I_output2,:);
+%     output(I_output2, 5) = 1e8;
+% end
 
 % Get the plot of N vs n vs MSE for all 10 optimal pair
 
-output_for_each_optimal_pair = [];
-output_10_pairs = [];
+% output_for_each_optimal_pair = []; % dim = 3781 X 3
+% output_10_pairs = [];
+%
+% output_10_pairs(1,:,:) = output_4;
 
-for pair = 1:10
-    min_neigs = optimal_pair(pair,1);
-    min_eign_mag = optimal_pair(pair,2);
-    for N = 200:100:20000
-        for n = 2:20
-            try
-                [e1, e2, mse] = ErrorTest(N, n, min_neigs, min_eign_mag);
-                output_for_each_optimal_pair(end+1,:) = [N , n, mse];
-            catch
-%                 N, n
-                output_for_each_optimal_pair(end+1,:) = [N , n, 1e8];
-            end
+% for loop caused Subscripted assignment dimension mismatch.
+% for pair = 2:10
+%     pair
+%     min_neigs = optimal_pair(pair,1);
+%     min_eign_mag = optimal_pair(pair,2);
+%     for N = 200:100:20000
+%         for n = 2:20
+%             try
+%                 [e1, e2, mse] = ErrorTest(N, n, min_neigs, min_eign_mag);
+%                 output_for_each_optimal_pair(end+1,:) = [N , n, mse];
+%             catch
+% %                 N, n
+%                 output_for_each_optimal_pair(end+1,:) = [N , n, 1e8];
+%             end
+%         end
+%     end
+%     output_10_pairs(end+1,:,:) = output_for_each_optimal_pair;
+%     output_for_each_optimal_pair = [];
+% end
+
+optimal_5 = [];
+
+min_neigs = optimal_pair(5,1);
+min_eign_mag = optimal_pair(5,2);
+for N = 200:100:20000
+    for n = 2:20
+        try
+            [e1, e2, mse] = ErrorTest(N, n, min_neigs, min_eign_mag);
+            optimal_5(end+1,:) = [N , n, mse];
+        catch
+            optimal_5(end+1,:) = [N , n, 1e8];
         end
     end
-    output_10_pairs(end+1,:,:) = output_for_each_optimal_pair
 end
-
-
-

@@ -5,7 +5,7 @@ X = [4:1:62]';      %X represents neigs
 Y = [0:.01:.98]';   %Y is the eign_mag
 for j = 1:58
     for i = 1:99
-    Z(i,j) = outMSE(i*j);
+        Z(i,j) = outMSE(i*j);
     end
 end
 for j = 1:96
@@ -46,9 +46,9 @@ c = uicontrol;
 %         Z2(i,j) = out2MSE(i);
 %     end
 % end
-% 
+%
 % disp('Error 2: minimum MSE occurs at neigs = 63, eign_mag = .2, MES = [1.43713002308106e-10]')
-% 
+%
 % figure(3)
 % surfc(X2,Y2,Z2)
 % title('Error 2')
@@ -56,7 +56,7 @@ c = uicontrol;
 % ylabel('eigv\_mag')
 % zlabel('mse')
 % hold on
-% 
+%
 % figure(4)
 % surfl(X2,Y2,Z2)
 % title('Error 2')
@@ -81,7 +81,7 @@ for N = 200:100:20000
             [e1, e2, mse] = ErrorTest(N, n, min_neigs, min_eign_mag);
             output_5(end+1,:) = [N , n, mse];
         catch
-             N, n
+            N, n
             output_5(end+1,:) = [N , n, 1e8];
         end
     end
@@ -96,14 +96,46 @@ end
 %% Obtaining top 10 most optimal pairs from first batch (start_neigs4_eigv1_end_neigs62_eigv97)
 % then plot of N vs n vs MSE
 
-clear;
-load('start_neigs4_eigv1_end_neigs62_eigv97.mat');
+% clear;
+% load('start_neigs4_eigv1_end_neigs62_eigv97.mat');
 
-optimal_pair = [];
+warning ('off','all');
 
-[M_output1,I_output2] = min(output(:,5))
-output(I_output2,:)
-output[
+
+% optimal_pair = [];
+% 
+% % Get the top 10 optimal pair
+% for i = 1:10
+%     [M_output1,I_output2] = min(output(:,5));
+%     optimal_pair(end+1, :) = output(I_output2,:);
+%     output(I_output2, 5) = 1e8;
+% end
+
+
+% Get the plot of N vs n vs MSE for all 10 optimal pair
+
+output_for_each_optimal_pair = []; % dim = 3781 X 2
+output_10_pairs = [];
+
+output_10_pairs(1,:,:) = output_4;
+
+for pair = 2:10
+    pair
+    min_neigs = optimal_pair(pair,1);
+    min_eign_mag = optimal_pair(pair,2);
+    for N = 200:100:20000
+        for n = 2:20
+            try
+                [e1, e2, mse] = ErrorTest(N, n, min_neigs, min_eign_mag);
+                output_for_each_optimal_pair(end+1,:) = [N , n, mse];
+            catch
+%                 N, n
+                output_for_each_optimal_pair(end+1,:) = [N , n, 1e8];
+            end
+        end
+    end
+    output_10_pairs(end+1,:,:) = output_for_each_optimal_pair
+end
 
 
 
