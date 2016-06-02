@@ -1,7 +1,7 @@
 
-function [o1_error, o2_error, mse] = ErrorTest (neigs, eigv_mag)
+function [o1_error, o2_error, mse] = ErrorTest (big_N, small_n, neigs, eigv_mag)
     
-    N=20000; mag0=1; mag1=1; o1=.1; mag2= 1; o2=.15;
+    N=big_N; mag0=1; mag1=1; o1=.1; mag2= 1; o2=.15;
     t=0:N-1; t=t(:);
    
     %   y=mag0*randn(N,1)+mag1*sin(o1*t+2*pi*rand)+mag2*sin(o2*t+2*pi*rand);
@@ -9,7 +9,8 @@ function [o1_error, o2_error, mse] = ErrorTest (neigs, eigv_mag)
     % figure(2)
     %   plot(y)
     % estimating sinusoids per music, esprit
-    n=4; m=30;
+    n=small_n; 
+    m=30;
     
     % IS-based estimation
     diff = (o2-o1);

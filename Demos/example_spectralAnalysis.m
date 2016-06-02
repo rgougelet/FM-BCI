@@ -99,7 +99,7 @@ end
 
 % [M_output1,I_output2] = min(output(:,5))
 % Output: M_output1 = 2.8137e-14, I_output2 = 1779
-% output(1779,:)
+% output(I_output2,:)
 % Output the smallest row: 21.0000    0.9500   -0.0000    0.0000    0.0000
 
 
