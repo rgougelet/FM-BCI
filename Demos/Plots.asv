@@ -166,7 +166,7 @@ for i = 1:199
     end
 end
 
-disp('Optimal 1: neig = 21, eig_mag = 0.95, N = 18200, n = 4, MSE = 1.22996188683398e-14');
+disp('Optimal 1: neig = 21, eig_mag = 0.95, N = 18200, n = 4, MSE = 1.2299618e-14');
 
 zmax = .05;
 
@@ -189,7 +189,7 @@ for i = 1:199
     end
 end
 
-disp('Optimal 2: neig = 21, eig_mag = 0.94, N = 18200, n = 4, MSE = 1.22996188683398e-14');
+disp('Optimal 2: neig = 21, eig_mag = 0.94, ');
 zmax = .05;
 
 figure(2)
@@ -211,7 +211,6 @@ for i = 1:199
     end
 end
 
-disp('Optimal 3: nieg = 27, eig_mag = .89,  N = 8400, n = 4, MSE = 3.84267677942265e-14');
 zmax = .05;
 
 figure(3)
@@ -233,7 +232,6 @@ for i = 1:199
     end
 end
 
-disp('Optimal 4: neig = 17, eig_mag = .94, N = 17500, n = 4, MSE = 4,2.39344394938992e-14');
 zmax = .001;
 
 figure(4)
@@ -255,7 +253,6 @@ for i = 1:199
     end
 end
 
-disp('Optimal 5: neig = 24, eig_mag = .93, N = 17000, n = 4, MSE = 2.34173430089391e-13');
 zmax = .05;
 
 figure(5)
