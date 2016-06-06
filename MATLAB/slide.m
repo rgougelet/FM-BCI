@@ -1,5 +1,4 @@
-function slide(source,callbackdata, X_N)
-disp(X_N);    
+function slide(source,callbackdata, X_N, Y_n, Z_1, Z_2, Z_3, Z_4, Z_5) 
 val = 6 - source.Value;
      if val == 1
         zmax = .05;

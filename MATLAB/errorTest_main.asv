@@ -167,9 +167,8 @@ for i = 1:199
 end
 
 disp('Optimal 1: neig = 21, eig_mag = 0.95, N = 18200, n = 4, MSE = 1.22996188683398e-14');
+zmax = .05;
 
-% zmax = .05;
-% 
 % figure(1)
 % surfl(X_N,Y_n,Z_1)
 % title('Optimal 1')
@@ -191,8 +190,8 @@ for i = 1:199
 end
 
 disp('Optimal 2: neig = 21, eig_mag = 0.94, N = 18200, n = 4, MSE = 1.22996188683398e-14');
-% zmax = .05;
-% 
+zmax = .05;
+
 % figure(2)
 % surfl(X_N,Y_n,Z_2)
 % title('Optimal 2')
@@ -214,7 +213,7 @@ for i = 1:199
 end
 
 disp('Optimal 3: nieg = 27, eig_mag = .89,  N = 8400, n = 4, MSE = 3.84267677942265e-14');
-% zmax = .05;
+zmax = .05;
 % 
 % figure(3)
 % surfl(X_N,Y_n,Z_3)
@@ -236,35 +235,35 @@ for i = 1:199
     end
 end
 
-disp('Optimal 4: neig = 17, eig_mag = .94, N = 17500, n = 4, MSE = 4,2.39344394938992e-14');
-% zmax = .001;
-% 
+disp('Optimal 4: neig = 17, eig_mag = .94, N = 17500, n = 4, MSE = 2.39344394938992e-14');
+zmax = .001;
+
 % figure(4)
 % surfl(X_N,Y_n,Z_4)
-% title('Optimal 4')
+% title('Optimum 4')
 % xlabel('N')
 % ylabel('n')
 % zlabel('MSE')
 % zlim([0,zmax])
 % hold on
 
-%% Optimal 5: neig = 24, eig_mag = .93 (old MSE = 5.37097337256780e-13)
+%% Optimum 5: neig = 24, eig_mag = .93 (old MSE = 5.37097337256780e-13)
 %   N = 17000, n = 4, MSE = 2.34173430089391e-13
 
 Z_5 = zeros([19,199]);
 
 for i = 1:199
     for j = 1:19
-        Z_5(j,i) = optimal_5_MSE(i*j);
+        Z_5(j,i) = Optimum_5_MSE(i*j);
     end
 end
 
-disp('Optimal 5: neig = 24, eig_mag = .93, N = 17000, n = 4, MSE = 2.34173430089391e-13');
-% zmax = .05;
-% 
+disp('Optimum 5: neig = 24, eig_mag = .93, N = 17000, n = 4, MSE = 2.34173430089391e-13');
+zmax = .05;
+
 % figure(5)
 % surfl(X_N,Y_n,Z_5)
-% title('Optimal 5')
+% title('Optimum 5')
 % xlabel('N')
 % ylabel('n')
 % zlabel('MSE')
@@ -274,64 +273,65 @@ disp('Optimal 5: neig = 24, eig_mag = .93, N = 17000, n = 4, MSE = 2.34173430089
 %%
 % btn = uicontrol('Style', 'pushbutton', 'String', 'Clear')
    sld = uicontrol('Style', 'slider',...
-        'Min',1,'Max',5,'Value',4);
-    if sld.Value == 1
-        zmax = .05;
-
-        figure(1)
-        surfl(X_N,Y_n,Z_1)
-        title('Optimal 1')
-        xlabel('N')
-        ylabel('n')
-        zlabel('MSE')
-        zlim([0,zmax])
-        hold on
-
-    elseif sld.Value == 2
-            zmax = .05;
-
-            figure(2)
-            surfl(X_N,Y_n,Z_2)
-            title('Optimal 2')
-            xlabel('N')
-            ylabel('n')
-            zlabel('MSE')
-            zlim([0,zmax])
-            hold on
-
-            elseif sld.Value == 3
-                zmax = .05;
-
-                figure(3)
-                surfl(X_N,Y_n,Z_3)
-                title('Optimal 3')
-                xlabel('N')
-                ylabel('n')
-                zlabel('MSE')
-                zlim([0,zmax])
-                hold on
-            
-                elseif sld.Value == 4
-                    zmax = .001;
-
-                    figure(4)
-                    surfl(X_N,Y_n,Z_4)
-                    title('Optimal 4')
-                    xlabel('N')
-                    ylabel('n')
-                    zlabel('MSE')
-                    zlim([0,zmax])
-                    hold on
-                
-                    else 
-                        zmax = .05;
-
-                        figure(5)
-                        surfl(X_N,Y_n,Z_5)
-                        title('Optimal 5')
-                        xlabel('N')
-                        ylabel('n')
-                        zlabel('MSE')
-                        zlim([0,zmax])
-                        hold on
-                    end
+        'Min',1,'Max',5,'Value',4, 'Callback', {@slide,X_N, Y_n, Z_1, Z_2, Z_3, Z_4, Z_5});
+%     if sld.Value == 1
+%         zmax = .05;
+% 
+%         figure(1)
+%         surfl(X_N,Y_n,Z_1)
+%         title('Optimum 1')
+%         xlabel('N')
+%         ylabel('n')
+%         zlabel('MSE')
+%         zlim([0,zmax])
+%         hold on
+% 
+%     elseif sld.Value == 2
+%             zmax = .05;
+% 
+%             figure(2)
+%             surfl(X_N,Y_n,Z_2)
+%             title('Optimum 2')
+%             xlabel('N')
+%             ylabel('n')
+%             zlabel('MSE')
+%             zlim([0,zmax])
+%             hold on
+% 
+%             elseif sld.Value == 3
+%                 zmax = .05;
+% 
+%                 figure(3)
+%                 surfl(X_N,Y_n,Z_3)
+%                 title('Optimum 3')
+%                 xlabel('N')
+%                 ylabel('n')
+%                 zlabel('MSE')
+%                 zlim([0,zmax])
+%                 hold on
+%             
+%                 elseif sld.Value == 4
+%                     zmax = .001;
+% 
+%                     figure(4)
+%                     surfl(X_N,Y_n,Z_4)
+%                     title('Optimum 4')
+%                     xlabel('N')
+%                     ylabel('n')
+%                     zlabel('MSE')
+%                     zlim([0,zmax])
+%                     hold on
+%                 
+%                     else 
+%                         zmax = .05;
+% 
+%                         figure(5)
+%                         surfl(X_N,Y_n,Z_5)
+%                         title('Optimum 5')
+%                         xlabel('N')
+%                         ylabel('n')
+%                         zlabel('MSE')
+%                         zlim([0,zmax])
+%                         hold on
+%     end
+%                     
