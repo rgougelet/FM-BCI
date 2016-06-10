@@ -32,7 +32,7 @@
 % xlabel('neigs')
 % ylabel('eigv\_mag')
 % zlabel('mse')
-% zlim([0,zmax])
+% 
 % hold on
 % 
 % c = uicontrol;
