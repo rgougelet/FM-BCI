@@ -35,7 +35,7 @@ def fm(dataLengthSamples, sampleRate, oscCenter, oscModFreq, oscFreqDev, oscAmp 
     t = np.arange(0,dataLengthSecs,sampleSpacing)      
     h = oscFreqDev/oscModFreq # Modulation index, < 1 narrowband, > 1 wideband
     fc = oscCenter  * 2.0 * np.pi * t
-    fm = (oscFreqDev*np.sin(2 * np.pi * oscModFreq * t) / oscModFreq)
+    fm = oscFreqDev*np.sin(2 * np.pi * oscModFreq * t) / oscModFreq
     osc = oscAmp*np.sin(fc + fm)
     voltageSamples = np.reshape(osc, ((dataLengthSamples,)))
     return voltageSamples

@@ -1,11 +1,11 @@
-function [voltageSamples,instAmp, instFreq, instPhase] = chan_osc(dataLengthSamples, sampleRate, oscCenter, varargin)
+function [voltageSamples, instAmp, instPhase, instFreq, instNoise] = chan_osc(dataLengthSamples, sampleRate, oscCenter, varargin)
 
     % default params
     oscAmp = 1;
     
     isFM = 0;
     oscModFreq = 1;
-    oscFreqDev = 1;
+    oscFreqDev = 5;
     
     isAM = 0;
     oscAModFreq = 1;
@@ -14,7 +14,7 @@ function [voltageSamples,instAmp, instFreq, instPhase] = chan_osc(dataLengthSamp
     isNoisy = 0;
     oscMean = 0;
     oscStdDev = 1/sqrt(2);
-    snr = 5;
+    snr = 1;
     noiseMean = 0;
     noiseStdDev = 0.5;
     samplingNoiseAmp = 0;
@@ -149,10 +149,33 @@ function [voltageSamples,instAmp, instFreq, instPhase] = chan_osc(dataLengthSamp
     dataLengthSecs = dataLengthSamples/sampleRate;
     t = 0:sampleSpacing:(dataLengthSecs-sampleSpacing);
     h = oscFreqDev/oscModFreq; % Modulation index, FYI < 1 narrowband, > 1 wideband
-    instAmp = oscAmp+isAM*oscAmpDev*sin(2*pi*oscAModFreq*t)/oscAModFreq; % mod around center amp
-    instFreq = oscCenter + (isFM*oscFreqDev)*sin(2*pi*oscModFreq*t)/oscModFreq; % mod around center freq
-    voltageSamples = instAmp.*sin(instFreq*2*pi.*t) + isNoisy*(pinkNoise + samplingNoiseAmp * rand(1,dataLengthSamples));
+    instAmp = oscAmp + isAM*oscAmpDev*cos(2*pi*oscAModFreq*t)/oscAModFreq; % mod around center amp
+    fc = oscCenter*2*pi*t;
+    fm = isFM*h*cos(2*pi*oscModFreq*t);
+    instNoise = isNoisy*(pinkNoise + samplingNoiseAmp * rand(1,dataLengthSamples));
+    voltageSamples = instAmp.*cos(fc-fm) + instNoise;
     
     %Optional output of instaneous phase
-    instPhase = sampleRate./diff(instFreq);%unwrapped
+    instFreq = sampleRate/(2*pi)*diff(fc-fm);
+    instPhase = wrapTo2Pi(fc-fm);
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
