@@ -1,24 +1,5 @@
 function [voltageSamples, instAmp, instPhase, instFreq, instNoise] = chan_osc(dataLengthSamples, sampleRate, oscCenter, varargin)
 
-    % default params
-    oscAmp = 1;
-    
-    isFM = 0;
-    oscModFreq = 1;
-    oscFreqDev = 5;
-    
-    isAM = 0;
-    oscAModFreq = 1;
-    oscAmpDev = 1;
-    
-    isNoisy = 0;
-    oscMean = 0;
-    oscStdDev = 1/sqrt(2);
-    snr = 1;
-    noiseMean = 0;
-    noiseStdDev = 0.5;
-    samplingNoiseAmp = 0;
-    
     % open help if no arguments provided
     if nargin == 1
         help chan_fm;
@@ -34,6 +15,40 @@ function [voltageSamples, instAmp, instPhase, instFreq, instNoise] = chan_osc(da
     % make sure all keywords have matching values
     if (round(nargin/2) == nargin/2)
         error('Even number of input arguments??')
+    end
+
+    % default params
+    oscAmp = 1;
+    oscAmpGiven = 0;
+  
+    isFM = 0;
+    oscModFreq = 1;
+    oscFreqDev = 5;
+    
+    isAM = 0;
+    oscAModFreq = 1;
+    oscAmpDev = 1;
+    
+    isNoisy = 0;
+    oscMean = 0;
+    oscStdDev = 1/sqrt(2);
+    snr = 1;
+    noiseMean = 0;
+    noiseStdDev = 0.5;
+    samplingNoiseAmp = 0;
+
+    % Set oscillation amplitude
+    for i = 1:2:length(varargin)
+        Param = varargin{i};
+        Value = varargin{i+1};
+        if ~ischar(Param)
+            error('Flag arguments must be strings')
+        end
+        if strcmpi(Param,'oscAmp')
+            oscAmpGiven = 1;
+            oscAmp = Value;
+        end
+        break
     end
     
     % Does the user want AM signal?
@@ -65,6 +80,10 @@ function [voltageSamples, instAmp, instPhase, instFreq, instNoise] = chan_osc(da
         end
     end
     
+    if oscAmp - oscAmpDev < 0
+        warning('AM amplitude deviation exceeds identified oscillation amplitude, i.e. the oscillation amplitude becomes negative')
+    end
+    
     % Does the user want FM signal?
     for i = 1:2:length(varargin)
         Param = varargin{i};
@@ -92,6 +111,10 @@ function [voltageSamples, instAmp, instPhase, instFreq, instNoise] = chan_osc(da
             end
             break
         end
+    end
+    
+    if oscCenter-oscFreqDev < 0
+        error('Maximum frequence deviation (oscFreqDev) cannot exceed center frequency (oscCenter)')
     end
     
     % Does the user want noisy signal?
@@ -129,16 +152,15 @@ function [voltageSamples, instAmp, instPhase, instFreq, instNoise] = chan_osc(da
         end
     end
     
-    % TODO: add error case where fc-fm cannot be negative
-    % TODO: add error case where ac-am cannot be negative
-    % TODO: throw error for amplitude provided in noise case, when
-    % stddev... is provided
-    
     % Signal to noise parameters
     if isNoisy
+        if oscAmpGiven
+            warning('Provided oscillation amplitude overriden by given SNR and noise standard dev.')
+        end
         oscStdDev = abs(sqrt(snr*(noiseStdDev^2)));
         oscAmp = sqrt(2)*oscStdDev;
     end
+    
     % Constructs 1/f noise by taking CDF of normal dist.
     power = noiseStdDev^2;
     normalNoise = wgn(1,dataLengthSamples, power);
@@ -153,7 +175,7 @@ function [voltageSamples, instAmp, instPhase, instFreq, instNoise] = chan_osc(da
     fc = oscCenter*2*pi*t;
     fm = isFM*h*cos(2*pi*oscModFreq*t);
     instNoise = isNoisy*(pinkNoise + samplingNoiseAmp * rand(1,dataLengthSamples));
-    voltageSamples = instAmp.*cos(fc-fm) + instNoise;
+    voltageSamples = oscMean + instAmp.*cos(fc-fm) + instNoise;
     
     %Optional output of instaneous phase
     instFreq = sampleRate/(2*pi)*diff(fc-fm);
