@@ -1,5 +1,6 @@
 function [voltageSamples, instAmp, instPhase, instFreq, instNoise] = chan_osc(dataLengthSamples, sampleRate, oscCenter, varargin)
 
+    %TODO: optional time output
     % open help if no arguments provided
     if nargin == 1
         help chan_fm;
@@ -36,6 +37,8 @@ function [voltageSamples, instAmp, instPhase, instFreq, instNoise] = chan_osc(da
     noiseMean = 0;
     noiseStdDev = 0.5;
     samplingNoiseAmp = 0;
+    
+    isPhaseLocked = 1;
 
     % Set oscillation amplitude
     for i = 1:2:length(varargin)
@@ -48,7 +51,9 @@ function [voltageSamples, instAmp, instPhase, instFreq, instNoise] = chan_osc(da
             oscAmpGiven = 1;
             oscAmp = Value;
         end
-        break
+        if strcmpi(Param,'isPhaseLocked')
+            isPhaseLocked = Value;
+        end
     end
     
     % Does the user want AM signal?
@@ -164,7 +169,11 @@ function [voltageSamples, instAmp, instPhase, instFreq, instNoise] = chan_osc(da
     % Constructs 1/f noise by taking CDF of normal dist.
     power = noiseStdDev^2;
     normalNoise = wgn(1,dataLengthSamples, power);
-    pinkNoise = noiseMean+cumsum(normalNoise);
+%     if randi([0,1],1)
+        pinkNoise = noiseMean+cumsum(normalNoise);
+%     else
+%         pinkNoise = noiseMean-cumsum(normalNoise);
+%     end
     
     % Constructs signal
     sampleSpacing = 1/sampleRate;
@@ -175,7 +184,11 @@ function [voltageSamples, instAmp, instPhase, instFreq, instNoise] = chan_osc(da
     fc = oscCenter*2*pi*t;
     fm = isFM*h*cos(2*pi*oscModFreq*t);
     instNoise = isNoisy*(pinkNoise + samplingNoiseAmp * rand(1,dataLengthSamples));
-    voltageSamples = oscMean + instAmp.*cos(fc-fm) + instNoise;
+    if isPhaseLocked
+        voltageSamples = oscMean + instAmp.*cos(fc-fm) + instNoise;
+    else
+        voltageSamples = oscMean + instAmp.*cos(fc-fm+rand*2*pi) + instNoise;
+    end
     
     %Optional output of instaneous phase
     instFreq = sampleRate/(2*pi)*diff(fc-fm);

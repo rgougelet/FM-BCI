@@ -18,7 +18,9 @@
       x = linspace(0,1, N);
       y = sin(10.52*2*pi*x)+sin(10.56*2*pi*x);
 %% plotting the fft-based spectra
-NN=2048; th=linspace(0,2*pi,NN);
+% NN=2048;
+th = 0:round(diff,4):2*pi;
+NN = length(th);
 Y =abs(fft(y,NN))/sqrt(N);
 Y =Y.^2;
 Y = Y/max(Y)*1.3;

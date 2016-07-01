@@ -9,7 +9,7 @@
 clear, close all
 
 N=1000; mag0=.35; mag1=.5; o1=.1; mag2=1; o2=.15;
-t=0:N-1; t=t(:);
+k=0:N-1; k=k(:);
 
 % drawing the target frequency1 vs frequency2 for the subsequently generated
 % scatter diagrams
@@ -25,7 +25,7 @@ IS_count=0;
 MUSIC_count=0;
 ESPRIT_count=0;
 for i=1:100,
-  y=mag0*randn(N,1)+mag1*sin(o1*t+2*pi*rand)+mag2*sin(o2*t+2*pi*rand);
+  y=mag0*randn(N,1)+mag1*sin(o1*k+2*pi*rand)+mag2*sin(o2*k+2*pi*rand);
 
 % estimating sinusoids per music, esprit
 n=4; m=30;
