@@ -23,18 +23,57 @@
     mag2=2;
     t=0:N-1; t=t(:);
 %     y=mag1*sin(o1*t)+mag2*sin(o2*t);
-%     osc1 = chan_osc(N,srate,f1,'isNoisy', 1);
-%     osc2 = chan_osc(N,srate,f2);
-%     y = (osc1+osc2);
+    osc1 = chan_osc(N,srate,f1,'isNoisy', 0);
+    osc2 = chan_osc(N,srate,f2);
+    y = (osc1+osc2);
 %     y = y';
-    y=mag0*randn(N,1)+mag1*sin(o1*t+2*pi*rand)+mag2*sin(o2*t+2*pi*rand);
-
+%     y=mag0*randn(N,1)+mag1*sin(o1*t+2*pi*rand)+mag2*sin(o2*t+2*pi*rand);
+%     plot(y);
     
-    y = hilbert(y);
+%     y = hilbert(y);
     diffo = mean([o1,o2]);
 %     y = y';
+
+%% Original demo
+%% SIGNAL = sinusoids + noise
+%  Setting up the signal parameters and time history
+      N=100;
+      mag0=1.8;mag1=1.5; o1=1.3; mag2=2; o2=1.35;
+      t=0:N-1; t=t(:);
+      y=mag0*randn(N,1)+mag1*exp(1i*(o1*t+2*pi*rand))+mag2*exp(1i*(o2*t+2*pi*rand));
+      diffo = mean([o1,o2]);
 %% plotting the fft-based spectra
 NN=2048; th=linspace(0,2*pi,NN);
+Y =abs(fft(y,NN))/sqrt(N);
+Y =Y.^2;
+Y = Y/max(Y)*1.3;
+figure(1);
+subplot(1,2,1),hold on
+                plot(o1, mag1, 'r^','MarkerSize',12);
+                plot(th,Y,'Color',[0,0.6,0],'LineWidth',1.2),
+                legend('true spectral line', 'FFT-based');
+                plot(o2, mag2, 'r^','MarkerSize',12);
+                line([o1 o1],[0,mag1]);
+                line([o2 o2],[0,mag2]);
+                Arrow([o1 0],[o1,mag1]);
+                set(gca,'xlim',[0 2*pi]);
+                set(gca,'ylim',[0 2.5]);              
+                set(gca,'YTick',[]);
+                xlabel('frequency','FontSize',14);
+
+subplot(1,2,2),hold on
+               plot(o1, mag1, 'r^','MarkerSize',12);
+               plot(th,Y,'Color',[0,0.6,0],'LineWidth',1.2),
+               legend('true spectral line', 'FFT-based');
+               plot(o2, mag2, 'r^','MarkerSize',12);
+               line([o1 o1],[0,mag1]);
+               line([o2 o2],[0,mag2]);
+               axis([o1*0.9 o2*1.1 0 2.5]);
+               set(gca,'YTick',[]);
+               xlabel('frequency','FontSize',14);
+
+%% plotting the fft-based spectra
+NN=N; th=linspace(0,2*pi,N);
 Y =abs(fft(y,NN))/sqrt(N);
 Y =Y.^2;
 Y = Y/max(Y)*1.3;
@@ -59,14 +98,15 @@ subplot(1,2,2),hold on
                plot(o2, mag2, 'r^','MarkerSize',12);
                line([o1 o1],[0,mag1]);
                line([o2 o2],[0,mag2]);
-               axis([diffo*0.9 diffo*1.1 0 2.5]);
+               axis([o1*0.9 o2*1.1 0 2.5]);
                set(gca,'YTick',[]);
                xlabel('frequency','FontSize',14);
 
 
 %% setting up filter parameters and the svd of the input-to-state response
 thetamid=diffo; 
-[A,B]=cjordan(8,0.99*exp(thetamid*1i));
+% [A,B]=cjordan(5,0.88*exp(thetamid*1i));
+[A,B]=cjordan(8,0.9*exp(thetamid*1i));
 sv=Rsigma(A,B,th);
 figure(2);
 plot(th(:),sv(:),'r','LineWidth',1.3); hold on;
@@ -98,15 +138,12 @@ axis([0 2*pi 0 svmax+1])
 set(gca,'YTick',[]);
 xlabel('$\|G(e^{i\theta})\|$ v.s. $\theta$', 'Interpreter', 'Latex','FontSize', 16);
 
-
-
-
 %% obtaining state statistics
-R=dlsim_complex(A,B,y');
+R=dlsim_complex(A,B,y); %needs row vector
 %% maximum entropy
 figure(3);
 spectrum=me(R,A,B,th);
-me_burg = pburg(y,5,th);
+me_burg = pburg(y,5,th); %needs row vector
 me_burg = me_burg/max(me_burg)*1.2;
 spectrum=spectrum/max(spectrum)*1.2;
 subplot(1,2,1),hold on
@@ -153,7 +190,7 @@ subplot(1,2,2),hold on
                 plot(o2, mag2, 'r^','MarkerSize',12);
                 line([o1 o1],[0,mag1]);
                 line([o2 o2],[0,mag2]);
-                axis([diffo*0.9 diffo*1.1 0 2.5]);
+                axis([o1*0.9 o2*1.1 0 2.5]);
                 set(gca,'YTick',[]);
                 xlabel('frequency','FontSize',14);
   
@@ -163,7 +200,7 @@ figure(4);
 [omegas,residues]=sm(R,A,B,2);
 Ac=compan(eye(1,6));
 Bc=eye(5,1);
-That=dlsim_complex(Ac,Bc,y');
+That=dlsim_complex(Ac,Bc,y); % expects row vector
 [w_esprit,r_esprit]=sm(That,Ac,Bc,2);
 residues=residues*1.6;
 r_esprit=r_esprit*.65;
@@ -230,7 +267,7 @@ subplot(1,2,2),hold on
                line([omegas(2) omegas(2)], [0 residues(2)], 'Color', 'b')
                line([w_esprit(2) w_esprit(2)], [0 r_esprit(2)], 'Color', 'g')  
                
-               axis([thmin thmax 0 3]);
+               axis([o1*0.9 o2*1.1 0 2.5]);
                set(gca,'YTick',[]);
                xlabel('frequency','FontSize',14);
                
@@ -278,7 +315,7 @@ subplot(1,2,2),hold on
                line([o1 o1],[0,mag1], 'Color', 'r');
                line([o2 o2],[0,mag2], 'Color', 'r');
 
-               axis([thmin thmax 0 3]);
+               axis([o1*0.9 o2*1.1 0 2.5]);
                set(gca,'YTick',[]);
                xlabel('frequency','FontSize',14);
 %% moving average decomposition
