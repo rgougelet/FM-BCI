@@ -1,17 +1,17 @@
 % frequency parameters
 oscCenter = 10;
 oscFreqDev = 0.04;
-dataLengthSamples = 10*40;%10000
+dataLengthSamples = 160;%10000
 sampleRate = 40;
-oscModFreq = 1;%0.02
+oscModFreq = 0.02;%0.02
 nTrials=1;
 
 sampleSpacing = 1/sampleRate;
 dataLengthSecs = dataLengthSamples/sampleRate;
 t = 0:sampleSpacing:(dataLengthSecs-sampleSpacing);
 
-data = chan_osc(dataLengthSamples, sampleRate,oscCenter ,'isFM',1,'oscModFreq',oscModFreq,'oscFreqDev',oscFreqDev);
-% data = chan_osc(dataLengthSamples, sampleRate,oscCenter);
+% data = chan_osc(dataLengthSamples, sampleRate,oscCenter ,'isFM',1,'oscModFreq',oscModFreq,'oscFreqDev',oscFreqDev);
+data = chan_osc(dataLengthSamples, sampleRate,oscCenter);
 
 %{
 min_freq = 8;  %generally interested in 2-50 hz 
@@ -74,15 +74,15 @@ contourf(t,frex,tf,40,'linecolor','none')
 min_freq =  8;
 max_freq = 12;
 
-% other wavelet parameters
-frex = linspace(min_freq,max_freq,length(num_cycles));
-time = -10:1/sampleRate:10;
-half_wave = (length(time)-1)/2;
-
 % set a few different wavelet widths ("number of cycles" parameter)
 length_wave_secs = length(time)/sampleRate;
 max_num_cycles = max_freq*length_wave_secs;
 num_cycles = 2:4:max_num_cycles;
+
+% other wavelet parameters
+frex = linspace(min_freq,max_freq,length(num_cycles));
+time = -4:1/sampleRate:4;
+half_wave = (length(time)-1)/2;
 
 % FFT parameters
 nKern = length(time);
@@ -128,7 +128,6 @@ for cyclei=1:length(num_cycles)
     subplot(sqPlots,sqPlots,cyclei)
     
     contourf(t,frex,squeeze(tf(cyclei,:,:)),40,'linecolor','none')
-    set(gca,'ylim',[9.75 10.25])
 end
 
 
