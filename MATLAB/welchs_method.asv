@@ -1,7 +1,8 @@
 % frequency parameters
+clear
 oscCenter1 = 10.52;
 oscCenter2 = 10.54;
-dataLengthSecs = 100;
+dataLengthSecs = 25;
 sampleRate = 1000;
 nyq = sampleRate/2;
 dataLengthSamples = dataLengthSecs*sampleRate;
@@ -12,20 +13,30 @@ osc1 = chan_osc(dataLengthSamples, sampleRate,oscCenter1);
 osc2 = chan_osc(dataLengthSamples, sampleRate,oscCenter2);
 
 data = osc1+osc2;
-plot(data);
+% plot(data);
 
-%%
+%% FFT
+nfft = 100*sampleRate;
+dataX = fft(data,nfft)/dataLengthSamples;
+fft_f = linspace(0,nyq,floor(nfft/2)+1);
 
-windowLengthSamples = 128;
+dataX = dataX(1:length(fft_f)); %keep only positive frequencies
+
+% similar plot as above, but with an x-axis label
+plot(fft_f,2*abs(dataX))
+ylabel('Amplitude')
+
+%% Welch
+windowLengthSamples = 100;
 nOverlap = windowLengthSamples/2;
-nfft = 256;
-f = linspace(0,nyq,(nfft/2)+1);
-pxx = pwelch(data,windowLengthSamples,nOverlap,nfft);
+nfft = 100*sampleRate;
+% welch_f = linspace(0,nyq,floor(nfft/2)+1);
+[pow, welch_f] = pwelch(data,windowLengthSamples,nOverlap,nfft,sampleRate, 'power', 'onesided');
+amp = sqrt(pow);
+plot(welch_f,pow);
 
-plot(f,10*log10(pxx))
-
-ylabel('Magnitude (dB)')
+ylabel('Amplitude')
 
 %%Regina
 % Find the minimum dataLengthSamples needed to get a resolution of 0.02
-% adjust windowLengthSamples, nOverlap, 
+% adjust windowLengthSamples, nOverlap, and nfft
