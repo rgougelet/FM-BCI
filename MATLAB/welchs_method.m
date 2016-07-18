@@ -2,7 +2,7 @@
 clear
 oscCenter1 = 10.52;
 oscCenter2 = 10.54;
-dataLengthSecs = 25;
+dataLengthSecs = 5;
 sampleRate = 1000;
 nyq = sampleRate/2;
 dataLengthSamples = dataLengthSecs*sampleRate;
@@ -40,3 +40,5 @@ ylabel('Amplitude')
 %%Regina
 % Find the minimum dataLengthSamples needed to get a resolution of 0.02
 % adjust windowLengthSamples, nOverlap, and nfft
+%%
+pmusic(data,4,nfft,sampleRate)
