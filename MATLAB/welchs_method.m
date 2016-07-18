@@ -18,10 +18,6 @@ sampleRate = 1000;
 nyq = sampleRate/2;
 sampleSpacing = 1/sampleRate;
 
-
-
-% plot(data);
-
 %% FFT
 figure;
 for fft_dls = 45:100; % Approximately 50sec
