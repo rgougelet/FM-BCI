@@ -2,7 +2,7 @@
 clear
 oscCenter1 = 10.52;
 oscCenter2 = 10.54;
-dataLengthSecs = 25;
+dataLengthSecs = 25;%25
 sampleRate = 1000;
 nyq = sampleRate/2;
 dataLengthSamples = dataLengthSecs*sampleRate;
@@ -27,7 +27,7 @@ plot(fft_f,2*abs(dataX))
 ylabel('Amplitude')
 
 %% Welch
-windowLengthSamples = 100;
+windowLengthSamples = 100;%100
 nOverlap = windowLengthSamples/2;
 nfft = 100*sampleRate;
 % welch_f = linspace(0,nyq,floor(nfft/2)+1);
