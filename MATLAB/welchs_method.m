@@ -51,7 +51,7 @@ for welch_dls = 150; % Approximately 50sec
     data = osc1+osc2;
     
     tic
-    windowLengthSecs = 75;
+    windowLengthSecs = 100;
     windowLengthSamples = windowLengthSecs*sampleRate;
     overlapSecs = 0;
     nOverlap = overlapSecs*sampleRate;
