@@ -10,8 +10,7 @@ errs = zeros(1,length(permFreqs));
 for row = 1:length(permFreqs)
     errs(row) = mean((permFreqs(row,:)-target).^2);
 end
-errs = round(errs,6);
-errPerm = min(errs);
+errs = round(errs,2);
 % SortTarget=sort(target);
 %errSort = (SortTarget-freq(IndexFreq)).^2/length(target);
 % SubtractMat=zeros(length(target));

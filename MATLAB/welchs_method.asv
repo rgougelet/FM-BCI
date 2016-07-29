@@ -19,12 +19,12 @@ nyq = sampleRate/2;
 sampleSpacing = 1/sampleRate;
 
 %% FFT
-% figure;
+figure;
 fft_errors = [];
 
 fft_rts = [];
-fft_dls = 1:25:300;
-for dataLengthSecs = fft_dls; % Approximately 50sec
+for fft_dls = 1:50:200; % Approximately 50sec
+    dataLengthSecs = fft_dls;
     dataLengthSamples = dataLengthSecs*sampleRate;
     osc1 = chan_osc(dataLengthSamples, sampleRate,oscCenter1);
     osc2 = chan_osc(dataLengthSamples, sampleRate,oscCenter2);
@@ -36,9 +36,8 @@ for dataLengthSecs = fft_dls; % Approximately 50sec
     dataX = fft(data,nfft)/dataLengthSamples;
     fft_f = linspace(0,nyq,floor(nfft/2)+1);
     dataX = dataX(1:length(fft_f)); %keep only positive frequencies
-    amp = 2*abs(dataX);
     fft_rt = toc;
-    fft_error= performanceMat(fft_f,amp,[oscCenter1,oscCenter2]);
+    fft_error= performanceMat(fft_f,dataX,[oscCenter1,oscCenter2]);
     fft_errors = [fft_errors fft_error];
     fft_rts= [fft_rts fft_rt];
     
@@ -48,23 +47,25 @@ for dataLengthSecs = fft_dls; % Approximately 50sec
 %     title(['Data Length = ', num2str(fft_dls),' sec'])
 %     pause(0.5)
 end
-% close all
-% figure;
-plot(fft_dls,fft_errors);
-% figure;
-% plot(fft_dls,fft_rts);
+close all
+figure;
+plot(fft_errors);
+figure;
+plot(rts);
 
 %% Welch
 % figure;
 welch_errors = [];
 welch_rts = [];
 welch_wls = [];
-welch_dls = 1:50:250;
-for dataLengthSecs = welch_dls
+
+for welch_dls = 100:50:400;
+    welch_dls
     dls_errors = [];
     dls_rts = [];
-    wls = 1:50:dataLengthSecs;
+    wls = 1:50:welch_dls;
     for windowLengthSecs = wls;
+        dataLengthSecs = welch_dls;
         dataLengthSamples = dataLengthSecs*sampleRate;
         osc1 = chan_osc(dataLengthSamples, sampleRate,oscCenter1);
         osc2 = chan_osc(dataLengthSamples, sampleRate,oscCenter2);
@@ -98,17 +99,13 @@ for dataLengthSecs = welch_dls
 end
 
 %%
-close all
-figure;
+% close all
+% figure;
 % plot(fft_errors); 
-hold on; plot(welch_dls,welch_errors);
+hold on; plot(welch_errors);
 % legend('FFT','Welch')
 % figure;
 % plot(welch_rts);
-
-%% Regina 
-% plot FFT vs Welch on the same plot, save the figures, use full range of
-% values, 1:0.25:200. Also plot wls for welch, or figure out trend.
 
 %%
 % pmusic(data,4,nfft,sampleRate)
