@@ -23,7 +23,8 @@ sampleSpacing = 1/sampleRate;
 fft_errors = [];
 
 fft_rts = [];
-fft_dls = 1:25:300;
+%fft_dls = 1:25:300;
+fft_dls = 1:0.25:200;
 for dataLengthSecs = fft_dls; % Approximately 50sec
     dataLengthSamples = dataLengthSecs*sampleRate;
     osc1 = chan_osc(dataLengthSamples, sampleRate,oscCenter1);
@@ -50,7 +51,7 @@ for dataLengthSecs = fft_dls; % Approximately 50sec
 end
 % close all
 % figure;
-plot(fft_dls,fft_errors);
+%plot(fft_dls,fft_errors);
 % figure;
 % plot(fft_dls,fft_rts);
 
@@ -59,7 +60,8 @@ plot(fft_dls,fft_errors);
 welch_errors = [];
 welch_rts = [];
 welch_wls = [];
-welch_dls = 1:50:250;
+%welch_dls = 1:50:250;
+welch_dls = 1:0.25:200;
 for dataLengthSecs = welch_dls
     dls_errors = [];
     dls_rts = [];
@@ -101,7 +103,10 @@ end
 close all
 figure;
 % plot(fft_errors); 
-hold on; plot(welch_dls,welch_errors);
+%plot(fft_dls,fft_errors);
+%hold on; plot(welch_dls,welch_errors);
+
+
 % legend('FFT','Welch')
 % figure;
 % plot(welch_rts);
