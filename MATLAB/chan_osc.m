@@ -37,8 +37,7 @@ function [voltageSamples, instAmp, instPhase, instFreq, instNoise] = chan_osc(da
     noiseMean = 0;
     noiseStdDev = 0.5;
     samplingNoiseAmp = 0;
-    
-    isPhaseLocked = 1;
+    phaseOffset = 0;
 
     % Set oscillation amplitude
     for i = 1:2:length(varargin)
@@ -51,8 +50,8 @@ function [voltageSamples, instAmp, instPhase, instFreq, instNoise] = chan_osc(da
             oscAmpGiven = 1;
             oscAmp = Value;
         end
-        if strcmpi(Param,'isPhaseLocked')
-            isPhaseLocked = Value;
+        if strcmpi(Param,'phaseOffset') % assumes value from 0 to 2pi
+            phaseOffset = Value;
         end
     end
     
@@ -184,11 +183,8 @@ function [voltageSamples, instAmp, instPhase, instFreq, instNoise] = chan_osc(da
     fc = oscCenter*2*pi*t;
     fm = isFM*h*cos(2*pi*oscModFreq*t);
     instNoise = isNoisy*(pinkNoise + samplingNoiseAmp * rand(1,dataLengthSamples));
-    if isPhaseLocked
-        voltageSamples = oscMean + instAmp.*cos(fc-fm) + instNoise;
-    else
-        voltageSamples = oscMean + instAmp.*cos(fc-fm+rand*2*pi) + instNoise;
-    end
+    
+    voltageSamples = oscMean + instAmp.*cos(fc-fm+phaseOffset) + instNoise;
     
     %Optional output of instaneous phase
     instFreq = sampleRate/(2*pi)*diff(fc-fm);
