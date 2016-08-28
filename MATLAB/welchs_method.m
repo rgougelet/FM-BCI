@@ -22,7 +22,7 @@ phaseOffsets = 0:0.1:2*pi;
 %% FFT
 fft_errors= [];
 fft_rts = [];
-fft_dls = 1:5:200;
+fft_dls = 1:0.25:200;
 
 % insert for loop averaging phase offsets 0:0.1:2pi, see the average error
 % and average runtime
@@ -63,10 +63,13 @@ for dataLengthSecs = fft_dls;
 end
 
 % REGINA Save output matrix, fft_errors and fft_rts
+save('fft_errors.mat','fft_errors');
+save('fft_rts.mat','fft_rts');
+
 
 close all
 figure;
-plot(fft_dls,fft_errors_avg);
+plot(fft_dls,fft_errors);
 % figure;
 % plot(fft_dls,fft_rts);
 
@@ -76,19 +79,18 @@ welch_errors = [];
 welch_rts = [];
 welch_wls = [];
 %welch_dls = 1:50:250;
-welch_dls = 1:0.25:200;
+welch_dls = 1:5:200;
 welch_errors_mat= [];
 
 welch_rts_mat = [];
 
-for phaseOffset = 0:0.1:2*pi;
-	i=i+1;
-	welch_errors = [];
-	welch_rts = [];
+
 	for dataLengthSecs = welch_dls
 		dls_errors = [];
 		dls_rts = [];
-		wls = 1:50:dataLengthSecs;
+		
+        for phaseOffset = phaseOffsets
+            wls = 1:50:dataLengthSecs;
 		for windowLengthSecs = wls;
 			dataLengthSamples = dataLengthSecs*sampleRate;
 			osc1 = chan_osc(dataLengthSamples, sampleRate,oscCenter1,'phaseOffset',phaseOffset);
@@ -118,17 +120,17 @@ for phaseOffset = 0:0.1:2*pi;
 		[welch_error, ind] = min(dls_errors);
 		welch_wls = [welch_wls wls(ind)];
 		welch_rt = dls_rts(ind);
-		welch_errors = [welch_errors welch_error];
-		welch_rts= [welch_rts welch_rt];
+		
 	end
-	welch_errors_mat = [welch_errors_mat; welch_errors];
-	welch_rts_mat = [welch_rts_mat; welch_rts];
-end
-welch_errors_avg = mean(welch_errors_mat);
-welch_rts_avg = mean(welch_rts_mat);
+	welch_errors = [welch_errors welch_error];
+	welch_rts= [welch_rts welch_rt];
+    end
+
+save('welch_errors.mat','welch_errors');
+save('welch_rts.mat','welch_rts');
 close all
 figure;
-plot(welch_dls,welch_errors_avg);
+plot(welch_dls,welch_errors);
 %%
 close all
 figure;
