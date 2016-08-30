@@ -80,17 +80,14 @@ welch_rts = [];
 welch_wls = [];
 %welch_dls = 1:50:250;
 welch_dls = 1:5:200;
-welch_errors_mat= [];
-
-welch_rts_mat = [];
-
+dataLengthSec = 200;
 
 	for dataLengthSecs = welch_dls
 		dls_errors = [];
 		dls_rts = [];
 		
         for phaseOffset = phaseOffsets
-            wls = 1:50:dataLengthSecs;
+            wls = 1:50:dataLengthSec;
 		for windowLengthSecs = wls;
 			dataLengthSamples = dataLengthSecs*sampleRate;
 			osc1 = chan_osc(dataLengthSamples, sampleRate,oscCenter1,'phaseOffset',phaseOffset);
