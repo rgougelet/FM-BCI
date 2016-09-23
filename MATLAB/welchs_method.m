@@ -87,8 +87,8 @@ dataLengthSec = 200;
 		dls_rts = [];
 		
         for phaseOffset = phaseOffsets
-            wls = 1:50:dataLengthSec;
-		for windowLengthSecs = wls;
+            for wls = 1:50:dataLengthSec;
+             windowLengthSecs = wls;
 			dataLengthSamples = dataLengthSecs*sampleRate;
 			osc1 = chan_osc(dataLengthSamples, sampleRate,oscCenter1,'phaseOffset',phaseOffset);
 			osc2 = chan_osc(dataLengthSamples, sampleRate,oscCenter2);
