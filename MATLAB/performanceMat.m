@@ -1,10 +1,9 @@
 function [errPerm ] = performanceMat( freq, amp, target )
 %detect the number of peaks and the length from the target frequencies
 
-%errSort output
-[Y, I]=sort(amp);
-IndexFreq= I((end-length(target)+1):end);
-Freqs = round(freq(IndexFreq),2);
+[Y, I]=sort(amp); % sort top amps and freqs
+IndexFreq= I((end-length(target)+1):end); % retrieves however many target freqs there are by index
+Freqs = round(freq(IndexFreq),2); % finds corresponding freqs for indices
 permFreqs = perms(Freqs);
 errs = zeros(1,length(permFreqs));
 for row = 1:length(permFreqs)
@@ -12,6 +11,10 @@ for row = 1:length(permFreqs)
 end
 errs = round(errs,6);
 errPerm = min(errs);
+
+end
+
+%% trash
 % SortTarget=sort(target);
 %errSort = (SortTarget-freq(IndexFreq)).^2/length(target);
 % SubtractMat=zeros(length(target));
@@ -34,6 +37,3 @@ errPerm = min(errs);
 % errSort1= mean(SubtractMat(1:length(target)+1:end).^2);
 % errSort2= mean(SubtractMat(1:length(target)+1:end).^2);
 % errPerm = mean(SubtractMat.^2);
-
-end
-
