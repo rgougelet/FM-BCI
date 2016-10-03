@@ -102,4 +102,27 @@ pmusic(X2,4,'whole')     % Use twice the signal space dimension
 % pmusic(alphaWave,2, 'whole')
 
  
-                      
+%% ESPRIT example
+
+%  SIGNAL = sinusoids + noise
+%  Setting up the signal parameters and time history
+N=100;
+a0=1.8; a1=1.5; theta1=1.3; a2=2; theta2=1.35;
+k=1:N; k=k(:);
+y=a0*randn(N,1)+a1*exp(1i*(theta1*k+2*pi*rand))+a2*exp(1i*(theta2*k+2*pi*rand));
+
+% subspace method
+thetamid=1.325;
+
+[A,B]=cjordan(5,0.88*exp(thetamid*1i));
+
+R=dlsim_complex(A,B,y');
+
+
+[thetas,residues]=sm(R,A,B,2);
+Arrowb(thetas,residues); hold on;
+Ac=compan(eye(1,6));
+Bc=eye(5,1);
+That=dlsim_complex(Ac,Bc,y'); 
+[th_esprit,r_esprit]=sm(That,Ac,Bc,2); % ESPRIT spectral lines
+Arrowg(th_esprit,r_esprit);
