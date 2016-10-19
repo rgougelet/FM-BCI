@@ -20,9 +20,10 @@ phaseOffsets = 0:0.1:2*pi;
 
 
 %% FFT
+
 fft_errors= [];
 fft_rts = [];
-fft_dls = 1:5:200;
+fft_dls = 1:0.25:200;
 
 % insert for loop averaging phase offsets 0:0.1:2pi, see the average error
 % and average runtime
@@ -63,72 +64,93 @@ for dataLengthSecs = fft_dls;
 end
 
 % REGINA Save output matrix, fft_errors and fft_rts
+save('fft_errors.mat','fft_errors');
+save('fft_rts.mat','fft_rts');
+
 
 close all
 figure;
-plot(fft_dls,fft_errors_avg);
+plot(fft_dls,fft_errors);
 % figure;
 % plot(fft_dls,fft_rts);
 
 %% Welch
 % figure;
-welch_errors = [];
-welch_rts = [];
-welch_wls = [];
+welch_errors = []; % length is equal to length(welch_dls)
+welch_rts = []; % length is equal to length(welch_dls)
+welch_wls = []; % length is equal to length(welch_dls)
 %welch_dls = 1:50:250;
-welch_dls = 1:0.25:200;
-welch_errors_mat= [];
+welch_dls = 1:5:200;
+overlapPercent = [0 0.25 0.5 0.75];
 
-welch_rts_mat = [];
 
-for phaseOffset = 0:0.1:2*pi;
-	i=i+1;
-	welch_errors = [];
-	welch_rts = [];
-	for dataLengthSecs = welch_dls
-		dls_errors = [];
-		dls_rts = [];
-		wls = 1:50:dataLengthSecs;
-		for windowLengthSecs = wls;
-			dataLengthSamples = dataLengthSecs*sampleRate;
-			osc1 = chan_osc(dataLengthSamples, sampleRate,oscCenter1,'phaseOffset',phaseOffset);
-			osc2 = chan_osc(dataLengthSamples, sampleRate,oscCenter2);
-			data = osc1+osc2;
-			
-			tic
-			windowLengthSamples = windowLengthSecs*sampleRate;
-			overlapSecs = 0;
-			nOverlap = overlapSecs*sampleRate;
-			nfft = 100*sampleRate;
-			[pow, welch_f] = pwelch(data,windowLengthSamples,nOverlap,nfft,sampleRate, 'power', 'onesided');
-			amp = sqrt(pow);
-			dls_rt = toc;
-			
-			dls_error = performanceMat(welch_f,amp,[oscCenter1,oscCenter2]);
-			dls_errors = [dls_errors dls_error];
-			dls_rts= [dls_rts dls_rt];
-			
-			%     plot(welch_f,amp);
-			%     xlim([10.5 10.56])
-			%     ylabel('Amplitude')
-			%     title(['Data Length = ', num2str(welch_dls),' sec'])
-			%     pause(0.25)
-		end
-		
-		[welch_error, ind] = min(dls_errors);
-		welch_wls = [welch_wls wls(ind)];
-		welch_rt = dls_rts(ind);
-		welch_errors = [welch_errors welch_error];
-		welch_rts= [welch_rts welch_rt];
-	end
-	welch_errors_mat = [welch_errors_mat; welch_errors];
-	welch_rts_mat = [welch_rts_mat; welch_rts];
+for dataLengthSecs = welch_dls
+    dls_errors = []; % length equal to length(dls_wls)
+    dls_rts = []; % length equal to length(dls_wls)
+    dls_wls = 1:50:dataLengthSecs; 
+
+    for phaseOffset = phaseOffsets
+       for wls = dls_wls;
+ 
+            windowLengthSecs = wls;
+            dataLengthSamples = dataLengthSecs*sampleRate;
+            osc1 = chan_osc(dataLengthSamples, sampleRate,oscCenter1,'phaseOffset',phaseOffset);
+            osc2 = chan_osc(dataLengthSamples, sampleRate,oscCenter2);
+            data = osc1+osc2;
+
+            tic
+            windowLengthSamples = windowLengthSecs*sampleRate;
+            %overlapSecs = 0;
+            %nOverlap = overlapSecs*sampleRate;
+            nfft = 100*sampleRate;
+            FFTX = [];
+            for olp=overlapPercent 
+                stepsize = (1-olp)*windowLengthSamples;
+                maxK=dataLengthSamples/stepsize-1;
+                for K = 0:maxK-1
+                    U = sum(hamming(nfft))/nfft;
+                    startwin = stepsize*K + 1;
+                    endwin = stepsize*K + windowLengthSamples;
+                    FFTK = fft(hamming(nfft)'.*data(startwin:endwin));
+                    magFFTK = (1/(windowLengthSamples*U))*abs(FFTK).^2; %Normalize
+                    phaFFTK = angle(FFTK);  
+                    dbFFTK = 20*log10(magFFTK);
+                    dbFFTK = dbFFTK - max(dbFFTK);
+                    dbFFTK = dbFFTK./maxK; %Average
+                    FFTX = [FFTX dbFFTK];
+                end
+            end 
+            welch_f= linspace(-.5,.5,nfft);
+            %[pow, welch_f] = pwelch(data,windowLengthSamples,nOverlap,nfft,sampleRate, 'power', 'onesided');
+            %amp = sqrt(pow);
+            amp = sqrt(FFTX);
+            dls_rt = toc;
+
+            dls_error = performanceMat(welch_f,amp,[oscCenter1,oscCenter2]);
+            dls_errors = [dls_errors dls_error];
+            dls_rts= [dls_rts dls_rt];
+
+            %     plot(welch_f,amp);
+            %     xlim([10.5 10.56])
+            %     ylabel('Amplitude')
+            %     title(['Data Length = ', num2str(welch_dls),' sec'])
+            %     pause(0.25)
+        end
+
+    [welch_error, ind] = min(dls_errors);
+    welch_wls = [welch_wls wls(ind)];
+    welch_rt = dls_rts(ind);
+
+    end
+welch_errors = [welch_errors welch_error];
+welch_rts= [welch_rts welch_rt];
 end
-welch_errors_avg = mean(welch_errors_mat);
-welch_rts_avg = mean(welch_rts_mat);
+
+save('welch_errors.mat','welch_errors');
+save('welch_rts.mat','welch_rts');
 close all
 figure;
-plot(welch_dls,welch_errors_avg);
+plot(welch_dls,welch_errors);
 %%
 close all
 figure;
