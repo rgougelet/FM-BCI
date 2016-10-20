@@ -78,19 +78,46 @@ ylabel('magnitude');
 
 %% MUSIC example
 
+% Complex Signal Example
 n=0:99;   
 s=exp(1i*pi/2*n)+2*exp(1i*pi/4*n)+exp(1i*pi/3*n)+randn(1,100);  
-X=corrmtx(s,12,'mod');   % Estimate the correlation matrix using
-                      % the modified covariance method.
+X=corrmtx(s,12,'mod');   % Estimate the correlation matrix using the modified covariance method.
 pmusic(X,3,'whole')      % Uses the default NFFT of 256.
 
+% Real Signal Example
 n=0:99; figure;
 s2=sin(pi/3*n)+2*sin(pi/4*n)+randn(1,100);
-X2=corrmtx(s2,20,'cov'); % Estimate the correlation matrix using
-                      % the covariance method.            
-pmusic(X2,4,'whole')     % Use twice the signal space dimension
-                      % for real sinusoids.
-          
+plot(n, s2), xlabel('Time'), ylabel('Amplitude'), title('Real Signal');
+X2=corrmtx(s2,20,'cov'); % Estimate the correlation matrix using the covariance method.   
+figure;
+pmusic(X2,4,'whole')     % Use twice the signal space dimension for real sinusoids.
+  
+
+% Real Signal Modified - only works until 2.0
+n=0:99; figure;
+s2=sin(pi*1.8*n);
+plot(n, s2), xlabel('Time'), ylabel('Amplitude'), title('Real Signal');
+X2=corrmtx(s2,20,'cov'); % Estimate the correlation matrix using the covariance method.   
+figure;
+pmusic(X2,4,'whole')     % Use twice the signal space dimension for real sinusoids.
+  
+
+n = 0:199;
+x = cos(0.257*pi*n) + sin(0.2*pi*n) + 0.01*randn(size(n));
+plot(n, x), xlabel('Time'), ylabel('Amplitude'), title('Real Signal');
+figure;
+pmusic(x,4)      % Set p to 4 because there are two real inputs
+
+
+rng default
+n = 0:199;
+x = cos(0.257*pi*n) + sin(0.2*pi*n) + 0.01*randn(size(n));
+[P,f] = pmusic(x,[Inf,1.1],[],8000,7); % Window length = 7
+plot(f,20*log10(abs(P)))
+xlabel 'Frequency (Hz)', ylabel 'Power (dB)'
+title 'Pseudospectrum Estimate via MUSIC', grid on
+
+
 % figure;
 % Fs = 10;      %sampline frequency
 % T = 1/Fs;       %sampling period
@@ -102,14 +129,17 @@ pmusic(X2,4,'whole')     % Use twice the signal space dimension
 % pmusic(alphaWave,2, 'whole')
 
  
-%% ESPRIT example
+%% ESPRIT example - only works for theta1 <=6.2 for some reason
 
 %  SIGNAL = sinusoids + noise
 %  Setting up the signal parameters and time history
 N=100;
-a0=1.8; a1=1.5; theta1=1.3; a2=2; theta2=1.35;
+a0=1.8; a1=1.5; theta1=6.2; a2=2; theta2=1.35;
 k=1:N; k=k(:);
-y=a0*randn(N,1)+a1*exp(1i*(theta1*k+2*pi*rand))+a2*exp(1i*(theta2*k+2*pi*rand));
+% ESPRIT is translational invariant since the phase change (+2*pi*rand)
+% does not affect the parameter estimation
+% y=a0*randn(N,1)+a1*exp(1i*(theta1*k+2*pi*rand))+a2*exp(1i*(theta2*k+2*pi*rand));
+y=exp(1i*(theta1*k));
 
 % subspace method
 thetamid=1.325;
@@ -120,7 +150,7 @@ R=dlsim_complex(A,B,y');
 
 
 [thetas,residues]=sm(R,A,B,2);
-Arrowb(thetas,residues); hold on;
+% Arrowb(thetas,residues); hold on;
 Ac=compan(eye(1,6));
 Bc=eye(5,1);
 That=dlsim_complex(Ac,Bc,y'); 
