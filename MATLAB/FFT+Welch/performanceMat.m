@@ -1,16 +1,17 @@
-function [errPerm ] = performanceMat( freq, amp, target )
-%detect the number of peaks and the length from the target frequencies
+function [errPerm] = performanceMat( freq, amp, target )
+% This function detects peak amplitudes in the spectrum based on however
+% many targets you give it
 
-[Y, I]=sort(amp); % sort top amps and freqs
-IndexFreq= I((end-length(target)+1):end); % retrieves however many target freqs there are by index
-Freqs = round(freq(IndexFreq),2); % finds corresponding freqs for indices
-permFreqs = perms(Freqs);
-errs = zeros(1,length(permFreqs));
+[Y, I]=sort(amp); % Sort amplitudes along with indices
+IndexFreq= I((end-length(target)+1):end); % Retrieves the top n = length(target) amplitude indices
+Freqs = round(freq(IndexFreq),2); % Finds corresponding freqs for top amplitude indices
+permFreqs = perms(Freqs); % The amplitudes are less relevant, so look at all possible orderings based on amp
+errs = zeros(1,length(permFreqs)); % Stores MSE for each permutation
 for row = 1:length(permFreqs)
-    errs(row) = mean((permFreqs(row,:)-target).^2);
+    errs(row) = mean((permFreqs(row,:)-target).^2); %Subtracts permutated max amp freqs from target freqs
 end
 errs = round(errs,6);
-errPerm = min(errs);
+errPerm = min(errs); % Returns the error for the most accurate permutation
 
 end
 
