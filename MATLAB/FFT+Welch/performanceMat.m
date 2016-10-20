@@ -1,4 +1,4 @@
-function [errPerm] = performanceMat( freq, amp, target )
+function [errPerm, Freqs] = performanceMat( freq, amp, target )
 % This function detects peak amplitudes in the spectrum based on however
 % many targets you give it
 

@@ -11,14 +11,14 @@ max_ent_dls = 5;
 burg_dls = 5;
 spec_env_dls = 5;
 
-oscCenter1 = 10.52;
-oscCenter2 = 10.54;
-sampleRate = 1000;
+oscCenter1 = 10.52; % hard coded 
+oscCenter2 = 10.54; % hard coded
+sampleRate = 1000; % hard coded
 nyq = sampleRate/2;
 sampleSpacing = 1/sampleRate;
-phaseOffsets = 0:0.1:2*pi;
+phaseOffsets = 0:0.1:2*pi; % hard coded
 dataLengthGens = 1:11;
-dataLengths = (0.05*2.^dataLengthGens); % in seconds
+dataLengths = (0.05*2.^dataLengthGens); % in seconds hard coded
 plot(dataLengths)
 nfft = 100*sampleRate;
 
