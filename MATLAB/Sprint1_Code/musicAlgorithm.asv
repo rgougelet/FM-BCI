@@ -104,18 +104,17 @@ pmusic(X2,4,'whole')     % Use twice the signal space dimension for real sinusoi
 %%
 % n = 0:199;
 % x = cos(0.257*pi*n) + sin(0.2*pi*n) + 0.01*randn(size(n));
-dataLengthSecs = 50;
-dataLengthSamples = 1000;
+dataLengthSamples = 2000000;
 sampleRate = 1000;
 osc1Center = 10.52;
 osc2Center = 10.54;
 phaseOffset = pi/2;
-osc1 = chan_osc(dataLengthSamples, sampleRate,osc1Center,'phaseOffset',phaseOffset);
-osc2 = chan_osc(dataLengthSamples, sampleRate,osc2Center,'phaseOffset',phaseOffset);
+osc1 = chan_osc(dataLengthSamples, sampleRate,oscCenter,'phaseOffset',phaseOffset);
+osc2 = chan_osc(dataLengthSamples, sampleRate,oscCenter,'phaseOffset',phaseOffset);
 data = osc1+osc2;
-% plot(1:dataLengthSamples, data), xlabel('Time'), ylabel('Amplitude'), title('Real Signal');
+plot(1:dataLengthSamples, data), xlabel('Time'), ylabel('Amplitude'), title('Real Signal');
 figure;
-pmusic(data, 4, 100*sampleRate, 1000, 'onesided')      % Set p to 4 because there are two real inputs
+pmusic(data, 4, 1000)      % Set p to 4 because there are two real inputs
 
 
 %%
