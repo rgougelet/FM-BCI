@@ -106,15 +106,15 @@ pmusic(X2,4,'whole')     % Use twice the signal space dimension for real sinusoi
 % x = cos(0.257*pi*n) + sin(0.2*pi*n) + 0.01*randn(size(n));
 clc
 close all
-dataLengthSecs = 0.3; % plot error as function of this
+dataLengthSecs = 0.01; % plot error as function of this
 sampleRate = 1000;
 dataLengthSamples = dataLengthSecs*sampleRate; % hard coded 
 nfft = 100*sampleRate; % hard coded 
 osc1Center = 10.52;
 osc2Center = 10.54;
 phaseOffset = pi/2;
-osc1 = chan_osc(dataLengthSamples, sampleRate,osc1Center,'phaseOffset',phaseOffset);
-osc2 = chan_osc(dataLengthSamples, sampleRate,osc2Center,'phaseOffset',phaseOffset);
+osc1 = chan_osc(dataLengthSamples, sampleRate,osc1Center,'phaseOffset',phaseOffset, 'isNoisy', 0.005);
+osc2 = chan_osc(dataLengthSamples, sampleRate,osc2Center,'phaseOffset',phaseOffset, 'isNoisy', 0.005);
 data = osc1+osc2;
 plot(1:dataLengthSamples, data), xlabel('Time'), ylabel('Amplitude'), title('Real Signal');
 figure;
