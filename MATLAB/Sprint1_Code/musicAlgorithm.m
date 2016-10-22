@@ -93,20 +93,20 @@ figure;
 pmusic(X2,4,'whole')     % Use twice the signal space dimension for real sinusoids.
   
 
-%% Real Signal Modified - only works until 2.0
-n=0:500; figure;
-s2=sin(pi*1.8*n);
-plot(n, s2), xlabel('Time'), ylabel('Amplitude'), title('Real Signal');
-X2=corrmtx(s2,20,'cov'); % Estimate the correlation matrix using the covariance method.   
-figure;
-pmusic(X2,4,'whole')     % Use twice the signal space dimension for real sinusoids.
+% %% Real Signal Modified - only works until 2.0
+% n=0:500; figure;
+% s2=sin(pi*1.8*n);
+% plot(n, s2), xlabel('Time'), ylabel('Amplitude'), title('Real Signal');
+% X2=corrmtx(s2,20,'cov'); % Estimate the correlation matrix using the covariance method.   
+% figure;
+% pmusic(X2,4,'whole')     % Use twice the signal space dimension for real sinusoids.
   
 %%
 % n = 0:199;
 % x = cos(0.257*pi*n) + sin(0.2*pi*n) + 0.01*randn(size(n));
 clc
 close all
-dataLengthSecs = 0.01; % plot error as function of this
+dataLengthSecs = 0.3; % plot error as function of this
 sampleRate = 1000;
 dataLengthSamples = dataLengthSecs*sampleRate; % hard coded 
 nfft = 100*sampleRate; % hard coded 
@@ -116,22 +116,54 @@ phaseOffset = pi/2;
 osc1 = chan_osc(dataLengthSamples, sampleRate,osc1Center,'phaseOffset',phaseOffset);
 osc2 = chan_osc(dataLengthSamples, sampleRate,osc2Center,'phaseOffset',phaseOffset);
 data = osc1+osc2;
-% plot(1:dataLengthSamples, data), xlabel('Time'), ylabel('Amplitude'), title('Real Signal');
+plot(1:dataLengthSamples, data), xlabel('Time'), ylabel('Amplitude'), title('Real Signal');
 figure;
 [S, f] = pmusic(data, 4, nfft, 1000, 'onesided');      % Set p to 4 because there are two real inputs
 plot(f,S)
-[mse, maxFreqs] = performanceMat(f,S,[10.52,10.54])
+[mse, maxFreqs] = performanceMat(f,S,[osc1Center,osc2Center])
 
-%%
 
-rng default
-n = 0:199;
-x = cos(0.257*pi*n) + sin(0.2*pi*n) + 0.01*randn(size(n));
-[P,f] = pmusic(x,[Inf,1.1],[],8000,7); % Window length = 7
-plot(f,20*log10(abs(P)))
-xlabel 'Frequency (Hz)', ylabel 'Power (dB)'
-title 'Pseudospectrum Estimate via MUSIC', grid on
 
+%% Graph MUSIC MSE Over Data Length Seconds
+clc
+close all
+
+dataLengthSecs = [0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.1];
+sampleRate = 1000;
+osc1Center = 10.52;
+osc2Center = 10.54;
+phaseOffset = pi/2;
+nfft = 100*sampleRate; % hard coded 
+    
+music_errors = [];
+
+
+for i = 1:numel(dataLengthSecs)
+    sec = dataLengthSecs(i);
+    dataLengthSamples = sec*sampleRate;
+    osc1 = chan_osc(dataLengthSamples, sampleRate,osc1Center,'phaseOffset',phaseOffset);
+    osc2 = chan_osc(dataLengthSamples, sampleRate,osc2Center,'phaseOffset',phaseOffset);
+    data = osc1+osc2;
+    [S, f] = pmusic(data, 4, nfft, 1000, 'onesided');      % Set p to 4 because there are two real inputs
+    [mse, maxFreqs] = performanceMat(f,S,[osc1Center,osc2Center]);
+    music_errors(end+1) = mse;
+end
+
+plot(dataLengthSecs,music_errors), xlabel('Data Length Seconds'), ylabel('Mean Square Error'), title('MUSIC MSE Over Data Length Seconds');
+
+
+% REGINA Save output matrix for mse
+% save('music_errors.mat','music_errors');
+
+
+% rng default
+% n = 0:199;
+% x = cos(0.257*pi*n) + sin(0.2*pi*n) + 0.01*randn(size(n));
+% [P,f] = pmusic(x,[Inf,1.1],[],8000,7); % Window length = 7
+% plot(f,20*log10(abs(P)))
+% xlabel 'Frequency (Hz)', ylabel 'Power (dB)'
+% title 'Pseudospectrum Estimate via MUSIC', grid on
+% 
 
 % figure;
 % Fs = 10;      %sampline frequency
