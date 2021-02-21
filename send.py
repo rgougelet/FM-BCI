@@ -17,10 +17,9 @@ sampleRate = 1024.0
 numOfChannel = 8
 dataLengthSecs = 300
 dataLengthSamples = dataLengthSecs*sampleRate
-voltageSamples = np.empty([numOfChannel,dataLengthSamples])
-for channelIndex in range(0,numOfChannel):
-    voltageSamples[channelIndex,:] = o.fm_noisy(dataLengthSamples, sampleRate, alphaCenter, alphaModFreq, alphaFreqDev)
-voltageSamples[channelIndex,:] = o.fm(dataLengthSamples, sampleRate, alphaCenter, alphaModFreq, alphaFreqDev) # ground truth
+voltageSamples = o.fm_noisy((numOfChannel, dataLengthSamples), sampleRate, alphaCenter, alphaModFreq, alphaFreqDev)
+voltageSamples[7,:] = o.chan_fm(dataLengthSamples, sampleRate, alphaCenter, alphaModFreq, alphaFreqDev) # ground truth
+
 
 # create outlet for output
 info = StreamInfo('SimulatedEEG', 'EEG', numOfChannel, sampleRate, 'float32', 'myuid34234')
